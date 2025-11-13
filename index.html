@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa de Utilidade Pública</title>
+    <title>Rede de Apoio - Araraquara/SP</title>
     <style>
         /* Estilos para garantir o layout de tela cheia */
         body, html {
@@ -11,12 +11,12 @@
             padding: 0;
             height: 100%;
             font-family: Arial, sans-serif;
-            overflow: hidden; /* Evita barras de rolagem na página inteira */
+            overflow: hidden;
         }
 
         #container {
             display: flex;
-            height: 100vh; /* 100% da altura da tela */
+            height: 100vh;
         }
 
         /* Menu lateral */
@@ -30,7 +30,7 @@
         
         #sidebar-header {
             padding: 20px;
-            background-color: #2E312F; /* Cor do seu mapa original */
+            background-color: #2E312F;
             color: white;
             text-align: center;
         }
@@ -40,7 +40,7 @@
             font-size: 1.5em;
         }
 
-        /* --- NOVOS ESTILOS --- */
+        /* Estilos para a seção de filtros */
         #sidebar-filters {
             padding: 15px;
             border-bottom: 1px solid #ddd;
@@ -82,7 +82,6 @@
             color: white;
             border-color: #4CAF50;
         }
-        /* --- FIM DOS NOVOS ESTILOS --- */
 
         #location-list {
             list-style-type: none;
@@ -113,7 +112,7 @@
             height: 100%;
         }
 
-        /* Estilos para a janela de informações (InfoWindow) */
+        /* Estilos para a janela de informações (InfoWindow ) */
         .info-window-content {
             max-width: 300px;
         }
@@ -144,10 +143,10 @@
         <!-- Menu Lateral -->
         <div id="sidebar">
             <div id="sidebar-header">
-                <h2>Locais de Apoio</h2>
+                <h2>Rede de Apoio - Araraquara/SP</h2>
             </div>
 
-            <!-- ATUALIZADO: Seção de Filtros e Busca -->
+            <!-- Seção de Filtros e Busca -->
             <div id="sidebar-filters">
                 <input type="text" id="search-box" placeholder="Buscar por nome ou endereço...">
                 <div id="category-filters">
@@ -165,14 +164,72 @@
     </div>
 
     <script>
+        // URL da sua Planilha Google (CSV)
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vStW-bhkRBtUEX_4npJm9fx-8NYux7D41CDLmhD3TRAujeEdic9oU4VGmYpoLG9idEidjHyhoCfJFDK/pub?output=csv';
+
+        // Definição das categorias com base no seu KML
+        const categories = {
+            'Serviços Públicos de Referência': {
+                name: "Serviços Públicos",
+                iconUrl: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+            },
+            'Pontos de Apoio e Parcerias': {
+                name: "Apoio e Parcerias",
+                iconUrl: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+            },
+            'Pontos de doação': {
+                name: "Pontos de Doação",
+                iconUrl: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
+            }
+        };
+
         let map;
         let infoWindow;
         let directionsService;
         let directionsRenderer;
+        let locations = []; // A lista de locais será preenchida com os dados da planilha
         const markers = [];
 
-        function initMap() {
-            const initialPosition = { lat: -22.9068, lng: -43.1729 };
+        // Função para carregar e parsear o CSV da Planilha Google
+        async function loadDataFromSheet( ) {
+            try {
+                const response = await fetch(SHEET_URL);
+                const csvText = await response.text();
+                
+                // Simples parser CSV: divide por linha e depois por vírgula
+                const lines = csvText.split('\n').filter(line => line.trim() !== '');
+                const headers = lines[0].split(',').map(header => header.trim());
+                
+                const data = lines.slice(1).map(line => {
+                    const values = line.split(',');
+                    let obj = {};
+                    headers.forEach((header, i) => {
+                        // Remove aspas e espaços em branco
+                        obj[header] = values[i] ? values[i].trim().replace(/^"|"$/g, '') : '';
+                    });
+                    // Converte lat/lng para números
+                    obj.lat = parseFloat(obj.lat);
+                    obj.lng = parseFloat(obj.lng);
+                    return obj;
+                });
+
+                locations = data.filter(loc => loc.lat && loc.lng); // Filtra locais sem coordenadas válidas
+                console.log(`Dados carregados: ${locations.length} locais encontrados.`);
+
+            } catch (error) {
+                console.error("Erro ao carregar dados da planilha:", error);
+                alert("Erro ao carregar os dados do mapa. Verifique o link da planilha.");
+            }
+        }
+
+        // Função principal que agora é assíncrona
+        async function initMap() {
+            // 1. Carrega os dados da planilha antes de tudo
+            await loadDataFromSheet();
+
+            // 2. Inicializa o mapa
+            // Usamos o centro de Araraquara/SP como posição inicial
+            const initialPosition = { lat: -21.7915, lng: -48.1739 };
 
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 13,
@@ -189,7 +246,7 @@
             const locationList = document.getElementById('location-list');
             const categoryFiltersContainer = document.getElementById('category-filters');
 
-            // --- ATUALIZAÇÃO: Criação dos botões de filtro ---
+            // 3. Criação dos botões de filtro
             const allButton = document.createElement('button');
             allButton.className = 'category-btn active';
             allButton.textContent = 'Todos';
@@ -204,8 +261,8 @@
                 button.dataset.category = categoryId;
                 categoryFiltersContainer.appendChild(button);
             }
-            // --- FIM DA ATUALIZAÇÃO ---
 
+            // 4. Criação dos marcadores e da lista
             locations.forEach((location, index) => {
                 const categoryInfo = categories[location.category];
                 const marker = new google.maps.Marker({
@@ -218,8 +275,10 @@
                 markers.push(marker);
 
                 const listItem = document.createElement('li');
+                // Exibe a categoria no item da lista
+                const categoryName = categoryInfo ? categoryInfo.name : 'Sem Categoria';
                 listItem.innerHTML = `<strong>${location.name}</strong>  
-<small>${location.address}</small>`;
+<small>${location.address || categoryName}</small>`;
                 listItem.dataset.index = index;
                 locationList.appendChild(listItem);
 
@@ -234,7 +293,7 @@
                 });
             });
 
-            // --- ATUALIZAÇÃO: Adiciona eventos de filtro ---
+            // 5. Adiciona eventos de filtro
             categoryFiltersContainer.addEventListener('click', (event) => {
                 if (event.target.classList.contains('category-btn')) {
                     document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
@@ -244,14 +303,13 @@
             });
 
             document.getElementById('search-box').addEventListener('keyup', filterLocations);
-            // --- FIM DA ATUALIZAÇÃO ---
 
             filterLocations(); // Chama o filtro na inicialização
         }
 
-        // --- NOVA FUNÇÃO ---
         function filterLocations() {
-            const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+            const activeCategoryElement = document.querySelector('.category-btn.active');
+            const activeCategory = activeCategoryElement ? activeCategoryElement.dataset.category : 'all';
             const searchTerm = document.getElementById('search-box').value.toLowerCase();
 
             locations.forEach((location, index) => {
@@ -273,14 +331,13 @@
                 }
             });
         }
-        // --- FIM DA NOVA FUNÇÃO ---
 
         function showLocationInfo(location, marker, index) {
             const content = `
                 <div class="info-window-content">
                     <h3>${location.name}</h3>
-                    <p><strong>Endereço:</strong> ${location.address}</p>
-                    <p><strong>Detalhes:</strong> ${location.details}</p>
+                    <p><strong>Endereço:</strong> ${location.address || 'Não informado'}</p>
+                    <p><strong>Detalhes:</strong> ${location.details || 'Não informado'}</p>
                     ${location.phone ? `<p><strong>Telefone:</strong> ${location.phone}</p>` : ''}
                     ${location.hours ? `<p><strong>Horário:</strong> ${location.hours}</p>` : ''}
                     <button class="get-directions-btn" onclick="calculateRouteTo(${location.lat}, ${location.lng})">
@@ -340,10 +397,7 @@
         window.initMap = initMap;
     </script>
 
-    <!-- 1. Carrega a lista de locais e categorias do arquivo externo -->
-    <script src="locations.js"></script>
-
-    <!-- 2. Carrega a API do Google Maps e, ao terminar, chama a função initMap -->
+    <!-- Carrega a API do Google Maps e, ao terminar, chama a função initMap -->
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTmQ_VAG5vGUroDiyn9mDOexOGPgUQlW8&callback=initMap"></script>
 
 </body>
