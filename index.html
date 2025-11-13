@@ -40,11 +40,55 @@
             font-size: 1.5em;
         }
 
+        /* --- NOVOS ESTILOS --- */
+        #sidebar-filters {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            background-color: #f1f1f1;
+        }
+
+        #search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        #category-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .category-btn {
+            background-color: #e7e7e7;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover {
+            background-color: #ddd;
+        }
+
+        .category-btn.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        /* --- FIM DOS NOVOS ESTILOS --- */
+
         #location-list {
             list-style-type: none;
             padding: 0;
             margin: 0;
-            overflow-y: auto; /* Adiciona rolagem se a lista for longa */
+            overflow-y: auto;
             flex-grow: 1;
         }
 
@@ -60,16 +104,16 @@
         }
         
         #location-list li.active {
-            background-color: #d4edda; /* Cor de destaque para o local ativo */
+            background-color: #d4edda;
         }
 
         /* Mapa */
         #map {
-            flex-grow: 1; /* Ocupa o restante do espaço */
+            flex-grow: 1;
             height: 100%;
         }
 
-        /* Estilos para a janela de informações (InfoWindow ) */
+        /* Estilos para a janela de informações (InfoWindow) */
         .info-window-content {
             max-width: 300px;
         }
@@ -102,6 +146,15 @@
             <div id="sidebar-header">
                 <h2>Locais de Apoio</h2>
             </div>
+
+            <!-- ATUALIZADO: Seção de Filtros e Busca -->
+            <div id="sidebar-filters">
+                <input type="text" id="search-box" placeholder="Buscar por nome ou endereço...">
+                <div id="category-filters">
+                    <!-- Os botões de categoria serão inseridos aqui pelo JavaScript -->
+                </div>
+            </div>
+
             <ul id="location-list">
                 <!-- A lista de locais será preenchida via JavaScript -->
             </ul>
@@ -112,9 +165,6 @@
     </div>
 
     <script>
-        // A lista de locais foi movida para o arquivo locations.js
-        // Agora este script apenas usa a variável 'locations' que já foi carregada.
-
         let map;
         let infoWindow;
         let directionsService;
@@ -122,63 +172,110 @@
         const markers = [];
 
         function initMap() {
-            // Posição inicial do mapa (centro do Rio de Janeiro, por exemplo)
             const initialPosition = { lat: -22.9068, lng: -43.1729 };
 
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 13,
                 center: initialPosition,
-                mapTypeControl: false, // Opcional: remove o seletor de tipo de mapa
-                streetViewControl: false // Opcional: remove o boneco do Street View
+                mapTypeControl: false,
+                streetViewControl: false
             });
 
             infoWindow = new google.maps.InfoWindow();
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer();
-            directionsRenderer.setMap(map); // Conecta o renderizador de rotas ao mapa
+            directionsRenderer.setMap(map);
 
             const locationList = document.getElementById('location-list');
+            const categoryFiltersContainer = document.getElementById('category-filters');
 
-            // A variável 'locations' vem do arquivo 'locations.js'
+            // --- ATUALIZAÇÃO: Criação dos botões de filtro ---
+            const allButton = document.createElement('button');
+            allButton.className = 'category-btn active';
+            allButton.textContent = 'Todos';
+            allButton.dataset.category = 'all';
+            categoryFiltersContainer.appendChild(allButton);
+
+            for (const categoryId in categories) {
+                const category = categories[categoryId];
+                const button = document.createElement('button');
+                button.className = 'category-btn';
+                button.textContent = category.name;
+                button.dataset.category = categoryId;
+                categoryFiltersContainer.appendChild(button);
+            }
+            // --- FIM DA ATUALIZAÇÃO ---
+
             locations.forEach((location, index) => {
-                // Adiciona o marcador no mapa
-                // Pega as informações da categoria do local
                 const categoryInfo = categories[location.category];
-
-                // Adiciona o marcador no mapa
                 const marker = new google.maps.Marker({
-                  position: { lat: location.lat, lng: location.lng },
-                  map: map,
-                  title: location.name,
-                  animation: google.maps.Animation.DROP,
-                  icon: categoryInfo ? categoryInfo.iconUrl : undefined // Define o ícone com base na categoria
-            });
-
+                    position: { lat: location.lat, lng: location.lng },
+                    map: map,
+                    title: location.name,
+                    animation: google.maps.Animation.DROP,
+                    icon: categoryInfo ? categoryInfo.iconUrl : undefined
+                });
                 markers.push(marker);
 
-                // Adiciona o local na lista do menu lateral
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `<strong>${location.name}</strong>  
 <small>${location.address}</small>`;
                 listItem.dataset.index = index;
                 locationList.appendChild(listItem);
 
-                // Evento de clique no marcador do mapa
                 marker.addListener('click', () => {
                     showLocationInfo(location, marker, index);
                 });
 
-                // Evento de clique no item da lista
                 listItem.addEventListener('click', () => {
                     showLocationInfo(location, marker, index);
-                    map.panTo(marker.getPosition()); // Centraliza o mapa no marcador
+                    map.panTo(marker.getPosition());
                     map.setZoom(15);
                 });
             });
+
+            // --- ATUALIZAÇÃO: Adiciona eventos de filtro ---
+            categoryFiltersContainer.addEventListener('click', (event) => {
+                if (event.target.classList.contains('category-btn')) {
+                    document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                    event.target.classList.add('active');
+                    filterLocations();
+                }
+            });
+
+            document.getElementById('search-box').addEventListener('keyup', filterLocations);
+            // --- FIM DA ATUALIZAÇÃO ---
+
+            filterLocations(); // Chama o filtro na inicialização
         }
 
+        // --- NOVA FUNÇÃO ---
+        function filterLocations() {
+            const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+            const searchTerm = document.getElementById('search-box').value.toLowerCase();
+
+            locations.forEach((location, index) => {
+                const listItem = document.querySelector(`#location-list li[data-index='${index}']`);
+                const marker = markers[index];
+
+                const categoryMatch = (activeCategory === 'all' || location.category === activeCategory);
+                const searchMatch = (
+                    location.name.toLowerCase().includes(searchTerm) ||
+                    location.address.toLowerCase().includes(searchTerm)
+                );
+
+                if (categoryMatch && searchMatch) {
+                    listItem.style.display = '';
+                    if(marker) marker.setVisible(true);
+                } else {
+                    listItem.style.display = 'none';
+                    if(marker) marker.setVisible(false);
+                }
+            });
+        }
+        // --- FIM DA NOVA FUNÇÃO ---
+
         function showLocationInfo(location, marker, index) {
-            // Conteúdo da janela de informações
             const content = `
                 <div class="info-window-content">
                     <h3>${location.name}</h3>
@@ -193,24 +290,19 @@
             `;
             infoWindow.setContent(content);
             infoWindow.open(map, marker);
-            
-            // Destaca o item ativo na lista
             highlightListItem(index);
         }
         
         function highlightListItem(index) {
-            // Remove o destaque de todos os itens
             document.querySelectorAll('#location-list li').forEach(item => {
                 item.classList.remove('active');
             });
-            // Adiciona destaque ao item clicado
             const activeItem = document.querySelector(`#location-list li[data-index='${index}']`);
             if (activeItem) {
                 activeItem.classList.add('active');
             }
         }
 
-        // Função para calcular e mostrar a rota
         function calculateRouteTo(destLat, destLng) {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -223,14 +315,14 @@
                         const request = {
                             origin: origin,
                             destination: { lat: destLat, lng: destLng },
-                            travelMode: google.maps.TravelMode.WALKING // Padrão para pedestres, pode ser alterado para DRIVING
+                            travelMode: google.maps.TravelMode.WALKING
                         };
 
                         directionsService.route(request, (result, status) => {
                             if (status == 'OK') {
                                 directionsRenderer.setDirections(result);
-                                infoWindow.close(); // Fecha a janela de informações para limpar a visão da rota
-                                highlightListItem(-1); // Remove destaque da lista
+                                infoWindow.close();
+                                highlightListItem(-1);
                             } else {
                                 window.alert('Não foi possível calcular a rota: ' + status);
                             }
@@ -248,7 +340,7 @@
         window.initMap = initMap;
     </script>
 
-    <!-- 1. Carrega a lista de locais do arquivo externo -->
+    <!-- 1. Carrega a lista de locais e categorias do arquivo externo -->
     <script src="locations.js"></script>
 
     <!-- 2. Carrega a API do Google Maps e, ao terminar, chama a função initMap -->
