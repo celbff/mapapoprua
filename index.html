@@ -1,577 +1,445 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rede de Apoio - Araraquara/SP</title>
-    <style>
-        /* Estilos para garantir o layout de tela cheia */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-        }
-
-        #container {
-            display: flex;
-            height: 100vh;
-        }
-
-        /* Menu lateral */
-        #sidebar {
-            width: 350px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        #sidebar-header {
-            padding: 20px;
-            background-color: #2E312F;
-            color: white;
-            text-align: center;
-        }
-
-        #sidebar-header h2 {
-            margin: 0;
-            font-size: 1.5em;
-        }
-
-        /* Estilos para a seção de filtros */
-        #sidebar-filters {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-            background-color: #f1f1f1;
-        }
-
-        #search-box {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            margin-bottom: 15px;
-        }
-
-        #category-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .category-btn {
-            background-color: #e7e7e7;
-            color: #333;
-            border: 1px solid #ccc;
-            border-radius: 15px;
-            padding: 5px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .category-btn:hover {
-            background-color: #ddd;
-        }
-
-        .category-btn.active {
-            background-color: #4CAF50;
-            color: white;
-            border-color: #4CAF50;
-        }
-
-        /* Container para a lista e o painel de detalhes */
-        #sidebar-content-wrapper {
-            flex-grow: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Lista de locais */
-        #location-list-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.3s ease-in-out;
-            overflow-y: auto;
-        }
-
-        #location-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        #location-list li {
-            padding: 15px 20px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.3s;
-        }
-
-        #location-list li:hover {
-            background-color: #e9ecef;
-        }
-        
-        #location-list li.active {
-            background-color: #d4edda;
-        }
-
-        /* Painel de Detalhes */
-        #details-panel {
-            position: absolute;
-            top: 0;
-            left: 100%; /* Começa fora da tela, à direita */
-            width: 100%;
-            height: 100%;
-            background-color: white;
-            transition: transform 0.3s ease-in-out;
-            overflow-y: auto;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        /* Estado ativo do painel de detalhes */
-        #sidebar.details-active #location-list-container {
-            transform: translateX(-100%); /* Move a lista para fora da tela */
-        }
-
-        #sidebar.details-active #details-panel {
-            transform: translateX(-100%); /* Move o painel de detalhes para a posição 0 */
-        }
-
-        /* Estilos do conteúdo do painel */
-        #details-panel h3 {
-            margin-top: 0;
-            color: #2E312F;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
-        }
-
-        .detail-item {
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-
-        .detail-item strong {
-            display: block;
-            color: #555;
-            font-size: 0.9em;
-        }
-
-        #back-to-list-btn {
-            background: none;
-            border: none;
-            color: #4285F4;
-            padding: 0;
-            margin-bottom: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
-
-        #back-to-list-btn:hover {
-            text-decoration: underline;
-        }
-
-        #get-directions-btn-details {
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 1em;
-            width: 100%;
-        }
-
-        #get-directions-btn-details:hover {
-            background-color: #357ae8;
-        }
-
-        /* Mapa */
-        #map {
-            flex-grow: 1;
-            height: 100%;
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Rede de Apoio - Mapa Interativo (Integrado)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+<style>
+  html,body,#app { height:100%; margin:0; font-family:Inter, system-ui, Arial; }
+  #container { display:flex; height:100vh; }
+  /* Sidebar similar to Manus layout */
+  #sidebar { width:360px; background:#f8f9fa; border-right:1px solid #ddd; display:flex; flex-direction:column; }
+  #sidebar-header { padding:18px; background:#2E312F; color:#fff; text-align:center; }
+  #sidebar-header h2 { margin:0; font-size:1.1rem; }
+  #sidebar-filters { padding:12px; border-bottom:1px solid #ddd; background:#f6f6f6; }
+  #search-box { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
+  #category-filters { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .category-btn { background:#e7e7e7; color:#333; border-radius:999px; padding:6px 10px; cursor:pointer; font-size:12px; border:1px solid #ccc; }
+  .category-btn.active { background:#4CAF50; color:#fff; border-color:#4CAF50; }
+  #sidebar-content-wrapper { position:relative; flex:1; overflow:hidden; }
+  #location-list-container { position:absolute; top:0; left:0; right:0; bottom:0; overflow:auto; padding:8px; }
+  #location-list li { padding:12px; border-bottom:1px solid #eee; cursor:pointer; }
+  #location-list li.active { background:#d4edda; }
+  /* Details panel sliding */
+  #details-panel { position:absolute; top:0; left:100%; width:100%; height:100%; background:#fff; transition:transform .28s ease-in-out; padding:16px; box-sizing:border-box; overflow:auto; }
+  #sidebar.details-active #location-list-container { transform:translateX(-100%); }
+  #sidebar.details-active #details-panel { transform:translateX(-100%); }
+  #map { flex:1; height:100%; }
+  /* Compact info window used when clicking marker from list */
+  .compact-card { background: #fff; border-radius:8px; padding:10px; box-shadow:0 6px 18px rgba(0,0,0,0.12); }
+  .btn { display:inline-block; padding:8px 10px; border-radius:6px; cursor:pointer; border:none; }
+  .btn-primary { background:#6d28d9; color:#fff; }
+  .btn-ghost { background:#f3f4f6; color:#111827; }
+  .ai-result { border:1px solid #e5e7eb; padding:8px; border-radius:6px; margin-top:10px; }
+</style>
 </head>
 <body>
-
-    <div id="container">
-        <!-- Menu Lateral -->
-        <div id="sidebar">
-            <div id="sidebar-header">
-                <h2>Rede de Apoio - Araraquara/SP</h2>
-            </div>
-
-            <!-- Seção de Filtros e Busca -->
-            <div id="sidebar-filters">
-                <input type="text" id="search-box" placeholder="Buscar por nome ou endereço...">
-                <div id="category-filters">
-                    <!-- Os botões de categoria serão inseridos aqui pelo JavaScript -->
-                </div>
-            </div>
-
-            <div id="sidebar-content-wrapper">
-                <!-- Container da Lista de Locais -->
-                <div id="location-list-container">
-                    <ul id="location-list">
-                        <!-- A lista de locais será preenchida via JavaScript -->
-                    </ul>
-                </div>
-
-                <!-- Painel de Detalhes do Local -->
-                <div id="details-panel">
-                    <button id="back-to-list-btn" onclick="hideDetailsPanel()">
-                        &#x25C0; Voltar para a Lista
-                    </button>
-                    <h3 id="detail-name"></h3>
-                    <div id="detail-category" class="detail-item"></div>
-                    <div id="detail-address" class="detail-item"></div>
-                    <div id="detail-details" class="detail-item"></div>
-                    <div id="detail-phone" class="detail-item"></div>
-                    <div id="detail-hours" class="detail-item"></div>
-                    
-                    <!-- Botão de Rota -->
-                    <button id="get-directions-btn-details">
-                        Como chegar a este local
-                    </button>
-
-                    <!-- Espaço para a Busca com IA (Passo 5) -->
-                    <div id="ai-info-section" class="detail-item">
-                        <button id="ai-search-btn" onclick="fetchAIInfo()">
-                            Buscar Detalhes com IA
-                        </button>
-                        <div id="ai-result" style="margin-top: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; display: none;">
-                            <!-- Resultado da IA será inserido aqui -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Onde o mapa será renderizado -->
-        <div id="map"></div>
+<div id="container">
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <h2>Rede de Apoio - Araraquara/SP</h2>
+    </div>
+    <div id="sidebar-filters">
+      <input id="search-box" placeholder="Buscar por nome ou endereço..." />
+      <div id="category-filters"></div>
     </div>
 
-    <script>
-        // URL da sua Planilha Google (CSV)
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vStW-bhkRBtUEX_4npJm9fx-8NYux7D41CDLmhD3TRAujeEdic9oU4VGmYpoLG9idEidjHyhoCfJFDK/pub?output=csv';
+    <div id="sidebar-content-wrapper">
+      <div id="location-list-container">
+        <ul id="location-list"></ul>
+      </div>
 
-        // Definição das categorias com base no seu KML
-        const categories = {
-            'Serviços Públicos de Referência': {
-                name: "Serviços Públicos",
-                iconUrl: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-            },
-            'Pontos de Apoio e Parcerias': {
-                name: "Apoio e Parcerias",
-                iconUrl: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
-            },
-            'Pontos de doação': {
-                name: "Pontos de Doação",
-                iconUrl: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
-            }
-        };
+      <div id="details-panel">
+        <button id="back-to-list-btn" style="background:none;border:none;color:#4285F4;cursor:pointer;font-weight:bold;margin-bottom:8px;">&#x25C0; Voltar para a Lista</button>
+        <h3 id="detail-name"></h3>
+        <div id="detail-category" class="detail-item"></div>
+        <div id="detail-address" class="detail-item"></div>
+        <div id="detail-details" class="detail-item"></div>
+        <div id="detail-phone" class="detail-item"></div>
+        <div id="detail-hours" class="detail-item"></div>
 
-        let map;
-        let directionsService;
-        let directionsRenderer;
-        let locations = [];
-        const markers = [];
-        let activeLocation = null;
+        <div style="margin-top:12px;">
+          <button id="get-directions-btn-details" class="btn" style="background:#4285F4;color:white;width:100%;">Como chegar a este local</button>
+        </div>
 
-        // Função para carregar e parsear o CSV da Planilha Google
-        async function loadDataFromSheet( ) {
-            try {
-                const response = await fetch(SHEET_URL);
-                const csvText = await response.text();
-                
-                // Simples parser CSV: divide por linha e depois por vírgula
-                const lines = csvText.split('\n').filter(line => line.trim() !== '');
-                const headers = lines[0].split(',').map(header => header.trim());
-                
-                const data = lines.slice(1).map(line => {
-                    const values = line.split(',');
-                    let obj = {};
-                    headers.forEach((header, i) => {
-                        obj[header] = values[i] ? values[i].trim().replace(/^"|"$/g, '') : '';
-                    });
-                    // Converte lat/lng para números
-                    obj.lat = parseFloat(obj.lat);
-                    obj.lng = parseFloat(obj.lng);
-                    return obj;
-                });
+        <div id="ai-info-section" style="margin-top:12px;">
+          <button id="ai-search-btn" class="btn btn-ghost">Buscar Detalhes com IA (Gemini)</button>
+          <div id="ai-result" class="ai-result" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-                locations = data.filter(loc => loc.lat && loc.lng);
-                console.log(`Dados carregados: ${locations.length} locais encontrados.`);
+  <div id="map"></div>
+</div>
 
-            } catch (error) {
-                console.error("Erro ao carregar dados da planilha:", error);
-                alert("Erro ao carregar os dados do mapa. Verifique o link da planilha.");
-            }
-        }
+<script>
+/* ======================== CONFIGURAÇÃO ======================== */
+/* Google Maps API key - substituir pela sua key */
+const GOOGLE_MAPS_API_KEY = "SUA_GOOGLE_MAPS_API_KEY_AQUI";
 
-        async function initMap() {
-            // 1. Carrega os dados da planilha antes de tudo
-            await loadDataFromSheet();
+/* Gemini API key - será lida de window.GEMINI_API_KEY se disponível
+   Recomenda-se injetar a chave no ambiente (Canvas / platform) como variável global para não expor no HTML. */
+const GEMINI_API_KEY = window.GEMINI_API_KEY || ""; // substituir por string direta se desejar
+const GEMINI_MODEL = "gemini-1.5-flash";
 
-            // 2. Inicializa o mapa
-            const initialPosition = { lat: -21.7915, lng: -48.1739 };
+/* CSV publicado (fornecido por você) */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vStW-bhkRBtUEX_4npJm9fx-8NYux7D41CDLmhD3TRAujeEdic9oU4VGmYpoLG9idEidjHyhoCfJFDK/pub?output=csv";
 
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 13,
-                center: initialPosition,
-                mapTypeControl: false,
-                streetViewControl: false
-            });
+/* Categoria -> ícone */
+const categories = {
+  'Serviços Públicos de Referência': { name: "Serviços Públicos", iconUrl: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" },
+  'Pontos de Apoio e Parcerias': { name: "Apoio e Parcerias", iconUrl: "http://maps.google.com/mapfiles/ms/icons/green-dot.png" },
+  'Pontos de Doação': { name: "Pontos de Doação", iconUrl: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png" }
+};
 
-            directionsService = new google.maps.DirectionsService();
-            directionsRenderer = new google.maps.DirectionsRenderer();
-            directionsRenderer.setMap(map);
+/* Estado global */
+let map, directionsService, directionsRenderer;
+let locations = []; // objetos com {name,category,address,details,phone,hours,lat,lng}
+let markers = [];
+let activeLocation = null;
 
-            const locationList = document.getElementById('location-list');
-            const categoryFiltersContainer = document.getElementById('category-filters');
+/* ======================== FUNÇÕES AUXILIARES ======================== */
 
-            // 3. Criação dos botões de filtro
-            const allButton = document.createElement('button');
-            allButton.className = 'category-btn active';
-            allButton.textContent = 'Todos';
-            allButton.dataset.category = 'all';
-            categoryFiltersContainer.appendChild(allButton);
+/**
+ * Parser CSV simples que trata aspas e vírgulas internas.
+ * Retorna array de objetos usando header row.
+ */
+function parseCSV(text) {
+  // split lines preserving quoted newlines
+  const rows = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i=0;i<text.length;i++) {
+    const ch = text[i];
+    const next = text[i+1]||'';
+    cur += ch;
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    }
+    if (ch === '\n' && !inQuotes) {
+      rows.push(cur.replace(/\r/g,'').trim());
+      cur = '';
+    }
+  }
+  if (cur.trim()) rows.push(cur.replace(/\r/g,'').trim());
+  const parsed = rows.map(r => {
+    const cells = [];
+    let cell = '';
+    let inside = false;
+    for (let i=0;i<r.length;i++) {
+      const ch = r[i];
+      const nxt = r[i+1] || '';
+      if (ch === '"' ) {
+        if (inside && nxt === '"') { cell += '"'; i++; continue; }
+        inside = !inside;
+        continue;
+      }
+      if (ch === ',' && !inside) {
+        cells.push(cell);
+        cell = '';
+        continue;
+      }
+      cell += ch;
+    }
+    cells.push(cell);
+    return cells;
+  });
 
-            for (const categoryId in categories) {
-                const category = categories[categoryId];
-                const button = document.createElement('button');
-                button.className = 'category-btn';
-                button.textContent = category.name;
-                button.dataset.category = categoryId;
-                categoryFiltersContainer.appendChild(button);
-            }
+  const header = parsed[0].map(h => h.trim());
+  const data = parsed.slice(1).map(row => {
+    const obj = {};
+    for (let i=0;i<header.length;i++) {
+      obj[header[i]] = (row[i] !== undefined) ? row[i].trim() : '';
+    }
+    return obj;
+  });
+  return data;
+}
 
-            // 4. Criação dos marcadores e da lista
-            locations.forEach((location, index) => {
-                const categoryInfo = categories[location.category];
-                const marker = new google.maps.Marker({
-                    position: { lat: location.lat, lng: location.lng },
-                    map: map,
-                    title: location.name,
-                    animation: google.maps.Animation.DROP,
-                    icon: categoryInfo ? categoryInfo.iconUrl : undefined
-                });
-                markers.push(marker);
+/* Normaliza acentos e espaços */
+function normalizeText(s) {
+  if (!s) return '';
+  return s.normalize('NFKC').replace(/\s+/g,' ').trim();
+}
 
-                const listItem = document.createElement('li');
-                const categoryName = categoryInfo ? categoryInfo.name : 'Sem Categoria';
-                listItem.innerHTML = `<strong>${location.name}</strong>  
-<small>${location.address || categoryName}</small>`;
-                listItem.dataset.index = index;
-                locationList.appendChild(listItem);
+/* ======================== INICIALIZAÇÃO DO MAPA ======================== */
+function loadScript(src, cb) {
+  const s = document.createElement('script');
+  s.src = src;
+  s.defer = true;
+  s.async = true;
+  s.onload = cb;
+  s.onerror = () => console.error("Erro ao carregar script:", src);
+  document.head.appendChild(s);
+}
 
-                // Evento de clique no marcador e na lista agora chama showDetailsPanel
-                marker.addListener('click', () => {
-                    showDetailsPanel(location, marker, index);
-                });
+/* Inicializa tudo após carregar Google Maps */
+function initMap() {
+  const initial = { lat: -21.7896, lng: -48.1776 };
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: initial, zoom: 13, streetViewControl:false, mapTypeControl:false
+  });
+  directionsService = new google.maps.DirectionsService();
+  directionsRenderer = new google.maps.DirectionsRenderer({suppressMarkers:true});
+  directionsRenderer.setMap(map);
 
-                listItem.addEventListener('click', () => {
-                    showDetailsPanel(location, marker, index);
-                });
-            });
+  // Carrega CSV, cria marcadores e interface
+  loadDataFromSheet();
+}
 
-            // 5. Adiciona eventos de filtro
-            categoryFiltersContainer.addEventListener('click', (event) => {
-                if (event.target.classList.contains('category-btn')) {
-                    document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-                    event.target.classList.add('active');
-                    filterLocations();
-                }
-            });
+/* ======================== CARREGA E NORMALIZA CSV ======================== */
+async function loadDataFromSheet() {
+  try {
+    const res = await fetch(SHEET_CSV_URL);
+    const txt = await res.text();
+    const rows = parseCSV(txt);
 
-            document.getElementById('search-box').addEventListener('keyup', filterLocations);
+    // Mapear e normalizar para: name,category,address,details,phone,hours,lat,lng
+    const mapped = rows.map(r => ({
+      name: normalizeText(r['name'] || r['nome'] || r['Name'] || ''),
+      category: normalizeText(r['category'] || r['categoria'] || r['Category'] || ''),
+      address: normalizeText(r['address'] || r['endereco'] || r['address'] || ''),
+      details: normalizeText(r['details'] || r['detalhes'] || ''),
+      phone: normalizeText(r['phone'] || r['telefone'] || ''),
+      hours: normalizeText(r['hours'] || r['horario'] || ''),
+      lat: parseFloat((r['lat'] || r['latitude'] || '').replace(/"/g,'')) || null,
+      lng: parseFloat((r['lng'] || r['longitude'] || '').replace(/"/g,'')) || null
+    })).filter(x => x.lat && x.lng && x.name);
 
-            // Evento para o botão "Como Chegar" no painel de detalhes
-            document.getElementById('get-directions-btn-details').addEventListener('click', () => {
-                if (activeLocation) {
-                    calculateRouteTo(activeLocation.lat, activeLocation.lng);
-                }
-            });
+    locations = mapped;
+    buildCategoryFilters();
+    renderLocationsList();
+    placeMarkers();
+    autoFitBounds();
+  } catch (e) {
+    console.error("Erro ao carregar CSV:", e);
+    alert("Erro ao carregar os dados do CSV. Verifique o link e a publicação do Google Sheets.");
+  }
+}
 
-            filterLocations();
-        }
+/* ======================== UI: FILTROS & LISTA ======================== */
+function buildCategoryFilters() {
+  const container = document.getElementById('category-filters');
+  container.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'category-btn active';
+  allBtn.dataset.category = 'all';
+  allBtn.textContent = 'Todos';
+  container.appendChild(allBtn);
 
-        // Função para buscar informações com IA (Simulação)
-        async function fetchAIInfo() {
-            const aiButton = document.getElementById('ai-search-btn');
-            const aiResultDiv = document.getElementById('ai-result');
-            
-            if (!activeLocation) return;
+  const seen = new Set();
+  locations.forEach(loc => {
+    const key = loc.category || 'Sem Categoria';
+    if (!seen.has(key)) {
+      const btn = document.createElement('button');
+      btn.className = 'category-btn';
+      btn.dataset.category = key;
+      btn.textContent = key;
+      container.appendChild(btn);
+      seen.add(key);
+    }
+  });
 
-            // 1. Prepara a interface para a busca
-            aiButton.disabled = true;
-            aiButton.textContent = 'Buscando... (Isso pode levar alguns segundos)';
-            aiResultDiv.style.display = 'block';
-            aiResultDiv.innerHTML = 'Aguarde, a IA está pesquisando sobre: <strong>' + activeLocation.name + '</strong>...';
+  container.addEventListener('click', (ev) => {
+    if (!ev.target.classList.contains('category-btn')) return;
+    document.querySelectorAll('.category-btn').forEach(b=>b.classList.remove('active'));
+    ev.target.classList.add('active');
+    filterLocations();
+  });
 
-            // 2. SIMULAÇÃO: Gerando um texto de exemplo
-            await new Promise(resolve => setTimeout(resolve, 3000)); // Espera 3 segundos para simular a busca
-            
-            const aiText = `
-                <p><strong>Análise da IA:</strong></p>
-                <p>O local <strong>${activeLocation.name}</strong>, em ${activeLocation.address || 'Araraquara/SP'}, é um ponto vital na rede de apoio. A pesquisa de IA sugere que, além dos serviços básicos, o local tem sido destaque em iniciativas de reintegração social, com foco em oficinas de capacitação profissional. Verifique o site oficial da prefeitura para confirmar a agenda de eventos e doações.</p>
-                <p><em>(Esta é uma simulação. Para ter uma busca real, você precisará de um servidor intermediário.)</em></p>
-            `;
+  document.getElementById('search-box').addEventListener('input', filterLocations);
+}
 
-            // 3. Exibe o resultado
-            aiResultDiv.innerHTML = aiText;
-            aiButton.disabled = false;
-            aiButton.textContent = 'Buscar Detalhes com IA';
-        }
+function renderLocationsList() {
+  const list = document.getElementById('location-list');
+  list.innerHTML = '';
+  locations.forEach((loc, idx) => {
+    const li = document.createElement('li');
+    li.dataset.index = idx;
+    li.innerHTML = `<strong>${loc.name}</strong><br/><small>${loc.address || loc.category || ''}</small>`;
+    li.addEventListener('click', () => {
+      // behavior: center map, zoom and open details panel
+      openFromList(idx);
+    });
+    list.appendChild(li);
+  });
+}
 
-        // Função para mostrar o painel de detalhes
-        function showDetailsPanel(location, marker, index) {
-            const sidebar = document.getElementById('sidebar');
-            const categoryInfo = categories[location.category];
-            
-            // Limpa o resultado da IA ao abrir um novo local
-            document.getElementById('ai-result').style.display = 'none';
-            document.getElementById('ai-result').innerHTML = '';
-            document.getElementById('ai-search-btn').disabled = false;
-            document.getElementById('ai-search-btn').textContent = 'Buscar Detalhes com IA';
+function filterLocations() {
+  const active = document.querySelector('.category-btn.active');
+  const category = active ? active.dataset.category : 'all';
+  const term = document.getElementById('search-box').value.toLowerCase();
+  locations.forEach((loc, i) => {
+    const li = document.querySelector(`#location-list li[data-index='${i}']`);
+    const matchCat = (category === 'all' || (loc.category || '') === category);
+    const matchSearch = loc.name.toLowerCase().includes(term) || (loc.address||'').toLowerCase().includes(term);
+    if (matchCat && matchSearch) { li.style.display=''; if (markers[i]) markers[i].setVisible(true);} else { li.style.display='none'; if (markers[i]) markers[i].setVisible(false); }
+  });
+}
 
-            // 1. Atualiza o conteúdo do painel
-            document.getElementById('detail-name').textContent = location.name;
-            document.getElementById('detail-category').innerHTML = `<strong>Categoria:</strong> ${categoryInfo ? categoryInfo.name : 'Não classificada'}`;
-            document.getElementById('detail-address').innerHTML = `<strong>Endereço:</strong> ${location.address || 'Não informado'}`;
-            document.getElementById('detail-details').innerHTML = `<strong>Detalhes:</strong> ${location.details || 'Nenhuma descrição disponível.'}`;
-            document.getElementById('detail-phone').innerHTML = location.phone ? `<strong>Telefone:</strong> ${location.phone}` : '';
-            document.getElementById('detail-hours').innerHTML = location.hours ? `<strong>Horário:</strong> ${location.hours}` : '';
+function highlightListItem(index) {
+  document.querySelectorAll('#location-list li').forEach(li=>li.classList.remove('active'));
+  const li = document.querySelector(`#location-list li[data-index='${index}']`);
+  if (li) li.classList.add('active');
+}
 
-            // 2. Armazena o local ativo e centraliza o mapa
-            activeLocation = location;
-            map.panTo(marker.getPosition());
-            map.setZoom(15);
+/* ======================== MARKERS & INTERAÇÃO ======================== */
+function placeMarkers() {
+  // limpa markers antigos
+  markers.forEach(m=>m.setMap(null));
+  markers = [];
+  locations.forEach((loc, idx) => {
+    const catInfo = categories[loc.category] || {};
+    const marker = new google.maps.Marker({
+      position: { lat: loc.lat, lng: loc.lng },
+      map,
+      title: loc.name,
+      icon: catInfo.iconUrl || undefined
+    });
+    marker.addListener('click', () => {
+      showDetailsPanel(loc, marker, idx);
+    });
+    markers.push(marker);
+  });
+}
 
-            // 3. Adiciona a classe para a transição CSS
-            sidebar.classList.add('details-active');
-            
-            // 4. Destaca o item na lista
-            highlightListItem(index);
-        }
+function autoFitBounds() {
+  if (!locations.length) return;
+  const bounds = new google.maps.LatLngBounds();
+  locations.forEach(l => bounds.extend({lat:l.lat,lng:l.lng}));
+  map.fitBounds(bounds);
+}
 
-        // Função para esconder o painel de detalhes
-        function hideDetailsPanel() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.remove('details-active');
-            activeLocation = null;
-            highlightListItem(-1); // Remove o destaque da lista
-            directionsRenderer.setDirections({ routes: [] }); // Limpa a rota
-            
-            // NOVO: Garante que todos os marcadores voltem a ser visíveis
-            markers.forEach(marker => marker.setVisible(true));
-        }
+/* ======================== PAINEL DE DETALHES ======================== */
+function showDetailsPanel(location, marker, index) {
+  const sidebar = document.getElementById('sidebar');
+  // reset AI result
+  const aiRes = document.getElementById('ai-result');
+  aiRes.style.display='none'; aiRes.innerHTML=''; document.getElementById('ai-search-btn').disabled=false;
+  // fill fields
+  document.getElementById('detail-name').textContent = location.name;
+  document.getElementById('detail-category').innerHTML = `<strong>Categoria:</strong> ${location.category || ''}`;
+  document.getElementById('detail-address').innerHTML = `<strong>Endereço:</strong> ${location.address || ''}`;
+  document.getElementById('detail-details').innerHTML = `<strong>Detalhes:</strong> ${location.details || 'Nenhuma descrição disponível.'}`;
+  document.getElementById('detail-phone').innerHTML = location.phone ? `<strong>Telefone:</strong> ${location.phone}` : '';
+  document.getElementById('detail-hours').innerHTML = location.hours ? `<strong>Horário:</strong> ${location.hours}` : '';
 
-        function calculateRouteTo(destLat, destLng) {
-            // NOVO: Esconde todos os marcadores antes de calcular a rota
-            markers.forEach(marker => marker.setVisible(false));
+  activeLocation = location;
+  map.panTo({lat:location.lat,lng:location.lng});
+  map.setZoom(15);
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const origin = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                        };
-                        
-                        const request = {
-                            origin: origin,
-                            destination: { lat: destLat, lng: destLng },
-                            travelMode: google.maps.TravelMode.WALKING
-                        };
+  // show sidebar details
+  sidebar.classList.add('details-active');
+  highlightListItem(index);
+}
 
-                        directionsService.route(request, (result, status) => {
-                            if (status == 'OK') {
-                                directionsRenderer.setDirections(result);
-                                // O DirectionsRenderer já cuida de exibir o marcador de destino.
-                                // Apenas limpamos o destaque da lista.
-                                highlightListItem(-1); 
-                            } else {
-                                window.alert('Não foi possível calcular a rota: ' + status);
-                                // NOVO: Se falhar, reexibe todos os marcadores
-                                markers.forEach(marker => marker.setVisible(true));
-                            }
-                        });
-                    },
-                    () => {
-                        alert('Não foi possível obter sua localização. Verifique as permissões do navegador.');
-                        // NOVO: Se falhar, reexibe todos os marcadores
-                        markers.forEach(marker => marker.setVisible(true));
-                    }
-                );
-            } else {
-                alert('Seu navegador não suporta geolocalização.');
-                // NOVO: Se falhar, reexibe todos os marcadores
-                markers.forEach(marker => marker.setVisible(true));
-            }
-        }
+/* hide details */
+function hideDetailsPanel() {
+  document.getElementById('sidebar').classList.remove('details-active');
+  activeLocation = null;
+  highlightListItem(-1);
+  directionsRenderer.setDirections({routes:[]});
+}
 
-        function highlightListItem(index) {
-            document.querySelectorAll('#location-list li').forEach(item => {
-                item.classList.remove('active');
-            });
-            const activeItem = document.querySelector(`#location-list li[data-index='${index}']`);
-            if (activeItem) {
-                activeItem.classList.add('active');
-            }
-        }
+/* open from list: center -> zoom -> show details (used by list click) */
+function openFromList(idx) {
+  const loc = locations[idx];
+  if (!loc) return;
+  map.panTo({lat:loc.lat,lng:loc.lng});
+  map.setZoom(15);
+  // Open details panel after slight delay for UX
+  setTimeout(()=> showDetailsPanel(loc, markers[idx], idx), 250);
+}
 
-        function calculateRouteTo(destLat, destLng) {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const origin = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                        };
-                        
-                        const request = {
-                            origin: origin,
-                            destination: { lat: destLat, lng: destLng },
-                            travelMode: google.maps.TravelMode.WALKING
-                        };
+/* ======================== ROTAS ======================== */
+function openNavigation(destinationAddress, destinationName, app) {
+  // Use Current+Location trick for Google Maps
+  const encoded = encodeURIComponent(destinationAddress || `${destinationName}`);
+  const originFallback = 'Current+Location';
+  let mapsUrl = '';
+  if (app === 'gmaps') mapsUrl = `https://www.google.com/maps/dir/${originFallback}/${encoded}`;
+  else if (app === 'waze') mapsUrl = `https://waze.com/ul?q=${encoded}&navigate=yes`;
+  window.open(mapsUrl,'_blank');
+}
 
-                        directionsService.route(request, (result, status) => {
-                            if (status == 'OK') {
-                                directionsRenderer.setDirections(result);
-                                highlightListItem(-1); 
-                            } else {
-                                window.alert('Não foi possível calcular a rota: ' + status);
-                            }
-                        });
-                    },
-                    () => {
-                        alert('Não foi possível obter sua localização. Verifique as permissões do navegador.');
-                    }
-                );
-            } else {
-                alert('Seu navegador não suporta geolocalização.');
-            }
-        }
+document.getElementById('get-directions-btn-details').addEventListener('click', ()=>{
+  if (!activeLocation) return alert('Selecione um local primeiro.');
+  openNavigation(activeLocation.address || `${activeLocation.lat},${activeLocation.lng}`, activeLocation.name, 'gmaps');
+});
 
-        window.initMap = initMap;
-    </script>
+/* ======================== IA GEMINI (opcional) ======================== */
+function showAIResult(html) {
+  const div = document.getElementById('ai-result');
+  div.style.display='block';
+  div.innerHTML = html;
+}
 
-    <!-- Carrega a API do Google Maps e, ao terminar, chama a função initMap -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxVq0rVgMGEkOAt2k_UhxhVNGg8BMp5gw&callback=initMap"></script>
+async function fetchWithRetry(payload, maxRetries=3, delay=1000) {
+  const base = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+  const url = GEMINI_API_KEY ? `${base}?key=${GEMINI_API_KEY}` : base;
+  for (let i=0;i<maxRetries;i++) {
+    try {
+      console.log(`[DEBUG] Tentativa ${i+1}: Chamando Gemini em ${url}`);
+      const res = await fetch(url, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      console.log('[DEBUG] Status:', res.status);
+      if (res.ok) return await res.json();
+      if (res.status===401) throw new Error('401');
+      if (res.status>=500 || res.status===429) await new Promise(r=>setTimeout(r, delay*Math.pow(2,i)));
+      else throw new Error(`Status ${res.status}`);
+    } catch (e) {
+      console.error('Erro Gemini tentativa', i+1, e);
+      if (e.message.includes('401')) throw e;
+      if (i===maxRetries-1) throw e;
+    }
+  }
+  throw new Error('Falha ao acessar Gemini');
+}
 
+async function gerarDescricaoIA(nome, endereco) {
+  if (!GEMINI_API_KEY) {
+    // Don't call if no key; show friendly message
+    showAIResult('<p style="color:#b91c1c"><strong>Chave Gemini ausente.</strong> Para usar a IA, injete a variável global <code>window.GEMINI_API_KEY</code> com sua API key.</p>');
+    return;
+  }
+  const systemPrompt = "Você é um Analista de Suporte Social em saúde e assistência. Forneça uma descrição breve (máx 4 frases) sobre o serviço do local. Responda em Português.";
+  const userQuery = `Descreva o local "${nome}" localizado em "${endereco}".`;
+  const payload = {
+    contents:[{parts:[{text:userQuery}]}],
+    systemInstruction:{parts:[{text:systemPrompt}]},
+    generationConfig:{responseMimeType:'text/plain'}
+  };
+  const result = await fetchWithRetry(payload);
+  const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta';
+  showAIResult(`<p><strong>Resposta IA:</strong></p><p>${text}</p>`);
+}
+
+/* attach IA button */
+document.getElementById('ai-search-btn').addEventListener('click', async ()=>{
+  if (!activeLocation) return alert('Selecione um local primeiro.');
+  const btn = document.getElementById('ai-search-btn'); btn.disabled=true; btn.textContent='Buscando...';
+  try {
+    await gerarDescricaoIA(activeLocation.name, activeLocation.address || `${activeLocation.lat},${activeLocation.lng}`);
+  } catch (e) {
+    showAIResult('<p style="color:#b91c1c">Erro ao consultar a IA. Verifique console.</p>');
+    console.error(e);
+  } finally {
+    btn.disabled=false; btn.textContent='Buscar Detalhes com IA (Gemini)';
+  }
+});
+
+/* back button */
+document.getElementById('back-to-list-btn').addEventListener('click', hideDetailsPanel);
+
+/* ======================== INICIAÇÃO: carregar Google Maps lib e iniciar ======================== */
+// Load Google Maps script dynamically with provided key
+loadScript(`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap`);
+
+</script>
 </body>
 </html>
