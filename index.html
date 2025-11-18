@@ -25,34 +25,44 @@
 
 <header class="site-header">
   <div id="menuOverlay" class="menu-overlay hidden"></div>
+
   <div class="container header-inner">
 
-    <div class="brand">
-      <img src="logo_comite.png" class="logo" alt="Logo Comitê" />
-      <div>
-        <h1>Rede de Apoio — População em Situação de Rua</h1>
-        <p class="subtitle">Araraquara / SP — Serviços, apoio e doações</p>
-      </div>
-    </div>
-
-    <div class="controls">
-      <div class="search">
-        <!-- Mantive o input (oculto via CSS) para não perder a integração futura -->
-        <input id="searchBox" type="search" placeholder="Pesquisar nome ou endereço..." />
-        <button id="btnClearSearch">✕</button>
-      </div>
-
-      <div class="search-bairro">
-        <!-- Mantido, oculto via CSS -->
-        <input id="bairroBox" type="search" placeholder="Buscar por bairro..." />
-      </div>
-
-      <button id="geoBtn" class="geo-btn">📍 Minha localização</button>
-
-      <button id="nearbyBtn" class="nearby-btn">🔎 Locais próximos</button>
-
+    <!-- Linha superior: menu + logo + título -->
+    <div class="header-top">
       <button id="menuBtn" class="hamburger-btn" aria-label="Abrir menu">☰</button>
+
+      <div class="brand">
+        <img src="logo_comite.png" class="logo" alt="Logo Comitê" />
+        <div>
+          <h1>Rede de Apoio — População em Situação de Rua</h1>
+          <p class="subtitle">Araraquara / SP — Serviços, apoio e doações</p>
+        </div>
+      </div>
     </div>
+
+    <!-- Linha inferior: botões e campos ocultos -->
+    <div class="header-actions">
+
+      <div class="controls">
+
+        <div class="search">
+          <!-- Mantive o input (oculto via CSS) para integrações futuras -->
+          <input id="searchBox" type="search" placeholder="Pesquisar nome ou endereço..." />
+          <button id="btnClearSearch">✕</button>
+        </div>
+
+        <div class="search-bairro">
+          <!-- Mantido, oculto via CSS -->
+          <input id="bairroBox" type="search" placeholder="Buscar por bairro..." />
+        </div>
+
+        <button id="geoBtn" class="geo-btn">📍 Minha localização</button>
+        <button id="nearbyBtn" class="nearby-btn">🔎 Locais próximos</button>
+
+      </div>
+    </div>
+
   </div>
 </header>
 
@@ -75,7 +85,6 @@
 
 <!-- Painel de Detalhes (BOTTOM SHEET) -->
 <div id="detailsPanel" class="details-panel hidden" role="dialog" aria-hidden="true" aria-label="Detalhes do local">
-  <!-- Handle para arrastar -->
   <div id="sheetHandle" class="sheet-handle" title="Arraste para cima para ver mais">
     <div class="handle-bar"></div>
   </div>
@@ -96,6 +105,7 @@
     <button id="routeBtn" class="route-btn">🧭 Ver rotas</button>
 
     <button id="detailsMoreBtn" class="details-more">Carregar mais detalhes</button>
+
 
     <!-- Bloco extra oculto por padrão, será exibido ao clicar em "Carregar mais detalhes" -->
     <div id="detailsExtraBlock" class="details-extra-block hidden">
@@ -123,3 +133,4 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
