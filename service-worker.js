@@ -1,35 +1,53 @@
-const CACHE_NAME = "mapa-apoio-v1";
+/* ============================================================
+   SERVICE WORKER — Rede de Apoio Araraquara
+   Cache offline (PWA)
+   ============================================================ */
 
-const FILES_TO_CACHE = [
-  "./",
-  "index.html",
-  "style.css",
-  "script.js",
-  "manifest.json",
-  "icon-192.png",
-  "icon-512.png",
-  "logo_comite.png"
+const CACHE_NAME = "rede-apoio-v1";
+
+const ASSETS = [
+  "/",
+  "/index.html",
+  "/style.css",
+  "/script.js",
+  "/manifest.json",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/placeholder.jpg"
 ];
+
+/* INSTALAÇÃO */
 
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
 });
+
+/* ATIVAÇÃO */
 
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys.map(k => k !== CACHE_NAME && caches.delete(k))
-      )
+      Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))
     )
   );
 });
 
+/* FETCH — offline first */
+
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(resp => resp || fetch(event.request))
+    caches.match(event.request).then(resp => {
+      return (
+        resp ||
+        fetch(event.request).then(fetchResp => {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, fetchResp.clone());
+            return fetchResp;
+          });
+        })
+      );
+    })
   );
 });
