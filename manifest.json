@@ -1,11 +1,10 @@
 {
   "name": "Rede de Apoio — Araraquara",
-  "short_name": "Mapa Apoio",
-  "start_url": "index.html",
+  "short_name": "Rede Apoio",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0b5ed7",
-  "description": "Mapa de serviços, apoio e doações para população em situação de rua.",
   "icons": [
     {
       "src": "icon-192.png",
