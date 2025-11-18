@@ -7,7 +7,7 @@
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Google Maps -->
+  <!-- Google Maps API -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAQuuCXrPdCDEK-jsMfAfzEMD12GtJt0YU&callback=initMap" async defer></script>
 
   <!-- MarkerClusterer -->
@@ -27,6 +27,7 @@
     </div>
 
     <div class="controls">
+
       <div class="search">
         <input id="searchBox" type="search" placeholder="Pesquisar nome ou endereço..." />
         <button id="btnClearSearch">✕</button>
@@ -44,10 +45,9 @@
 </header>
 
 <main class="container main-grid">
-  
+
   <!-- Painel lateral -->
   <aside id="panel" class="panel">
-
     <h2>Filtros</h2>
     <div id="filters" class="filters"></div>
 
@@ -55,7 +55,6 @@
 
     <h2>Lista de Locais</h2>
     <div id="listaLocais" class="lista"></div>
-
   </aside>
 
   <!-- MAPA -->
@@ -64,14 +63,20 @@
   </section>
 </main>
 
-<!-- Painel de Detalhes (tipo Google Maps) -->
+<!-- Painel de detalhes (desliza do rodapé) -->
 <div id="detailsPanel" class="details-panel hidden">
-  <button id="closeDetails" class="close-details">✕</button>
+  
+  <div class="details-header">
+    <div class="details-handle"></div>
+    <button id="closeDetails" class="close-details">✕</button>
+  </div>
 
   <div class="details-content">
-    <img id="detailsPhoto" class="details-photo" src="" alt="">
+    <img id="detailsPhoto" class="details-photo" src="" alt="Foto do local">
+
     <h2 id="detailsName"></h2>
-    <p id="detailsCategory"></p>
+    <p class="details-cat" id="detailsCategory"></p>
+    
     <p id="detailsAddress"></p>
     <p id="detailsDetails"></p>
     <p id="detailsPhone"></p>
@@ -80,6 +85,7 @@
 
     <button id="detailsMoreBtn" class="details-more">Carregar mais detalhes</button>
   </div>
+
 </div>
 
 <footer class="site-footer">
