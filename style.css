@@ -56,3 +56,81 @@ html,body{height:100%;margin:0;font-family:Inter, "Helvetica Neue", Arial, sans-
 .site-footer{padding:12px 0;text-align:center;color:var(--muted)}
 
 button#togglePanel{background:transparent;border:0;cursor:pointer;color:var(--primary);font-weight:600}
+
+/* === Novos estilos adicionados === */
+
+/* Bairro input */
+.bairro-input{
+  width:100%;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  margin-bottom:6px;
+}
+
+/* Lista de Locais */
+.places-list{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:40vh;
+  overflow-y:auto;
+  padding-right:6px;
+}
+.place-item{
+  padding:8px 10px;
+  background:#f1f3f5;
+  border-radius:6px;
+  cursor:pointer;
+  transition:background 0.25s, transform 0.12s;
+  font-size:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.place-item:hover{background:#e0e7ef; transform: translateY(-1px);}
+.place-active{
+  background:#d0e3ff !important;
+  border-left:4px solid #0b5ed7;
+}
+
+.place-distance{
+  font-size:12px;
+  color:var(--muted);
+  margin-left:8px;
+}
+
+/* faded markers (quando um está destacado) */
+.pin-faded{
+  opacity:0.35 !important;
+  transition:opacity 0.3s;
+}
+
+/* InfoWindow custom small tweaks */
+.infow-route{
+  display:inline-block;
+  margin-top:8px;
+  padding:6px 10px;
+  background:#0b5ed7;
+  color:#fff;
+  border-radius:6px;
+  text-decoration:none;
+  font-size:13px;
+}
+.infow-route:hover{background:#084db4}
+
+/* marcador do usuário */
+.user-marker {
+  border-radius:50%;
+  width:14px;
+  height:14px;
+  background: rgba(11,94,215,0.95);
+  box-shadow: 0 0 8px rgba(11,94,215,0.6);
+}
+
+/* responsividade: reduzir barra de busca no mobile */
+@media (max-width:500px){
+  .search input{width:120px}
+  .header-inner{padding:10px}
+}
