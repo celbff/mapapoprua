@@ -169,9 +169,13 @@ function initFilters() {
     `;
   });
 
-  document.querySelectorAll("#filters input").forEach(chk => {
-    chk.addEventListener("change", applyFilters);
+document.querySelectorAll('.lista-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelector('.panel').classList.remove('open');
+    document.querySelector('.menu-overlay').classList.add('hidden');
   });
+});
+
 }
 
 function applyFilters() {
@@ -663,3 +667,4 @@ document.addEventListener('DOMContentLoaded', () => {
   // garante comportamento do painel fechado inicialmente
   setPanelState('closed');
 });
+
