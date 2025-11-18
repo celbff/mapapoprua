@@ -1,289 +1,493 @@
-:root {
-  --bg:#f6f7f9;
-  --primary:#0b5ed7;
-  --muted:#6c757d;
-  --panel:#ffffff;
-  --shadow:0 6px 18px rgba(20,20,20,0.06);
-  --max-width:1200px;
+/* ---------------------------
+   CONFIGURAÇÃO DA FOTO
+---------------------------- */
+const PHOTO_BASE_URL = "https://raw.githubusercontent.com/celbff/mapapoprua/main/fotos/";
 
-  /* Detalhes */
-  --details-bg:#fff;
-  --details-shadow:0 -4px 22px rgba(0,0,0,0.18);
-}
+/* ---------------------------
+   DADOS INICIAIS (com campo photo)
+---------------------------- */
+const pontos = [
+  {
+    name: "Centro Pop",
+    category: "Serviços Públicos de Referência",
+    address: "",
+    details: "",
+    phone: "",
+    hours: "",
+    lat: -21.7895843,
+    lng: -48.1775678,
+    photo: "centro-pop.jpg"
+  },
+  {
+    name: 'Casa de acolhida "Assad-Kan"',
+    category: "Serviços Públicos de Referência",
+    address: "",
+    details: "",
+    phone: "",
+    hours: "",
+    lat: -21.7905161,
+    lng: -48.1917449,
+    photo: "assad-kan.jpg"
+  },
+  {
+    name: "CRAS Central",
+    category: "Serviços Públicos de Referência",
+    address: "Rua Gonçalves Dias, 468 Centro (antigo prédio da UMED, esquina com Av. Espanha)",
+    details: "Centro de Referência da Assistência Social - Unidade Central",
+    phone: "",
+    hours: "",
+    lat: -21.791522,
+    lng: -48.173929,
+    photo: "cras-central.jpg"
+  },
+  {
+    name: "Associação São Pio (masculino)",
+    category: "Pontos de Apoio e Parcerias",
+    address: "",
+    details: "Apoio social e reinserção",
+    phone: "",
+    hours: "",
+    lat: -21.824304,
+    lng: -48.2037705,
+    photo: "sao-pio-masc.jpg"
+  },
+  {
+    name: "Associação São Pio (feminina)",
+    category: "Pontos de Apoio e Parcerias",
+    address: "",
+    details: "Apoio social e reinserção",
+    phone: "",
+    hours: "",
+    lat: -21.7665622,
+    lng: -48.1782641,
+    photo: "sao-pio-fem.jpg"
+  },
+  {
+    name: "Fundo Social de Solidariedade de Araraquara",
+    category: "Pontos de doação",
+    address: "",
+    details: "",
+    phone: "",
+    hours: "",
+    lat: -21.7788367,
+    lng: -48.1921867,
+    photo: "fundo-social.jpg"
+  }
+];
 
-* { box-sizing:border-box; }
+const categoryConfig = {
+  "Serviços Públicos de Referência": { color: "#2b7cff" },
+  "Pontos de Apoio e Parcerias": { color: "#28a745" },
+  "Pontos de doação": { color: "#ff8c42" }
+};
 
-html,body {
-  height:100%;
-  margin:0;
-  font-family:Inter, Arial, sans-serif;
-  background:var(--bg);
-  color:#222;
-}
+/* ---------------------------
+   ESTADOS GLOBAIS
+---------------------------- */
+let map, markers = [], markerCluster;
+let userLocation = null;
+let userMarker = null;
+let selectedMarker = null;
+let previousView = null; // guarda posição/zoom antes de clicar
 
-.container {
-  max-width:var(--max-width);
-  margin:0 auto;
-  padding:0 16px;
-}
-
-/* HEADER */
-.site-header {
-  background:white;
-  border-bottom:1px solid #e6e9ee;
-  position:sticky;
-  top:0;
-  z-index:30;
-  box-shadow:var(--shadow);
-}
-.header-inner {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 0;
-}
-
-.brand {
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
-.brand h1 {
-  font-size:18px;
-  margin:0;
-}
-.brand .subtitle {
-  margin:2px 0 0;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.logo {
-  width:54px;
-  height:54px;
-  object-fit:contain;
-}
-
-/* CONTROLS */
-.controls {
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
-
-.search {
-  display:flex;
-  align-items:center;
-  background:#f1f3f5;
-  border-radius:8px;
-  padding:6px;
-  border:1px solid #e0e6ef;
-}
-.search input {
-  border:0;
-  background:transparent;
-  padding:6px 8px;
-  width:220px;
-  outline:none;
-}
-.search button {
-  background:transparent;
-  border:0;
-  cursor:pointer;
-  font-size:14px;
-  color:#777;
-}
-
-.search-bairro input {
-  border:1px solid #e0e6ef;
-  background:#f1f3f5;
-  padding:6px 10px;
-  border-radius:8px;
-  outline:none;
-}
-
-.geo-btn {
-  background:var(--primary);
-  color:#fff;
-  padding:8px 14px;
-  border-radius:8px;
-  cursor:pointer;
-  border:0;
-  font-weight:600;
+/* ---------------------------
+   CRIA PIN SVG COLORIDO
+---------------------------- */
+function makeSvgPin(color, size = 36) {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
+      <path d="M12 2C8 2 5 5 5 9c0 6.2 7 13 7 13s7-6.8 7-13c0-4-3-7-7-7z" fill="${color}" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="12" cy="9" r="2.5" fill="#fff"/>
+    </svg>`;
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
 }
 
-.panel-toggle {
-  background:transparent;
-  border:0;
-  color:var(--primary);
-  cursor:pointer;
-  font-weight:600;
+/* ---------------------------
+   INIT MAP
+---------------------------- */
+function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: -21.79, lng: -48.185 },
+    zoom: 13,
+    mapTypeControl: false,
+    fullscreenControl: true,
+    streetViewControl: false,
+    gestureHandling: "greedy"
+  });
+
+  createMarkers();
+  initFilters();
+  initListaLocais();
+  initSearch();
+  initBairroSearch();
+  initGeoBtn();
+  initDetailsPanel();
+  initPanelToggle();
+
+  fitToMarkers();
 }
 
-/* GRID */
-.main-grid {
-  display:grid;
-  grid-template-columns:320px 1fr;
-  gap:16px;
-  padding:18px 0;
-  min-height:calc(100vh - 120px);
-}
-@media (max-width:900px){
-  .main-grid { grid-template-columns:1fr; }
-  .panel { order:2; }
-  .map-section { order:1; }
+/* ---------------------------
+   CRIA TODOS OS MARCADORES
+---------------------------- */
+function createMarkers() {
+  markers.forEach(m => m.setMap(null));
+  markers = [];
+
+  pontos.forEach(p => {
+    const iconUrl = makeSvgPin(categoryConfig[p.category].color);
+    const marker = new google.maps.Marker({
+      position: { lat: p.lat, lng: p.lng },
+      map,
+      icon: { url: iconUrl, scaledSize: new google.maps.Size(36, 36) },
+      title: p.name,
+      optimized: true
+    });
+
+    marker._data = p;
+    marker._category = p.category;
+
+    marker.addListener("click", () => openDetails(marker));
+
+    markers.push(marker);
+  });
+
+  markerCluster = new markerClusterer.MarkerClusterer({ map, markers });
 }
 
-/* PAINEL LATERAL */
-.panel {
-  background:var(--panel);
-  padding:14px;
-  border-radius:10px;
-  box-shadow:var(--shadow);
-  height:fit-content;
-}
-.panel h2 {
-  margin:0 0 12px;
-}
-
-.filters {
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-.filter-item {
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.filter-item input {
-  transform:scale(1.1);
-}
-.filter-item label {
-  font-size:14px;
-  color:#222;
+/* ---------------------------
+   DESTACAR MARCADOR
+---------------------------- */
+function highlightMarker(marker) {
+  markers.forEach(m => {
+    if (m === marker) {
+      const cfg = categoryConfig[m._category];
+      m.setIcon({
+        url: makeSvgPin(cfg.color, 48),
+        scaledSize: new google.maps.Size(48, 48)
+      });
+      m.setOpacity(1);
+    } else {
+      m.setOpacity(0.25);
+      const cfg = categoryConfig[m._category];
+      m.setIcon({
+        url: makeSvgPin(cfg.color, 36),
+        scaledSize: new google.maps.Size(36, 36)
+      });
+    }
+  });
 }
 
-/* LISTA DE LOCAIS */
-.lista {
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-top:10px;
+/* ---------------------------
+   ABRIR DETALHES
+---------------------------- */
+function openDetails(marker) {
+  const p = marker._data;
+
+  previousView = {
+    center: map.getCenter(),
+    zoom: map.getZoom()
+  };
+
+  map.panTo(marker.getPosition());
+  map.setZoom(16);
+
+  highlightMarker(marker);
+  selectedMarker = marker;
+
+  // Foto
+  const photoUrl = p.photo ? PHOTO_BASE_URL + p.photo : "";
+  const photoEl = document.getElementById("detailsPhoto");
+  if (p.photo) {
+    photoEl.src = photoUrl;
+    photoEl.style.display = "block";
+  } else {
+    photoEl.style.display = "none";
+  }
+
+  document.getElementById("detailsName").textContent = p.name;
+  document.getElementById("detailsCategory").textContent = p.category;
+  document.getElementById("detailsAddress").textContent = p.address || "";
+  document.getElementById("detailsDetails").textContent = p.details || "";
+  document.getElementById("detailsPhone").textContent = p.phone || "";
+  document.getElementById("detailsHours").textContent = p.hours || "";
+
+  if (userLocation) {
+    const dist = haversine(userLocation.lat, userLocation.lng, p.lat, p.lng);
+    document.getElementById("detailsDistance").textContent =
+      `Distância: ${dist.toFixed(1)} km`;
+  } else {
+    document.getElementById("detailsDistance").textContent = "";
+  }
+
+  loadExtraDetails(p);
+
+  document.getElementById("detailsPanel").classList.add("open");
 }
 
-.place-item {
-  background:#fff;
-  border:1px solid #e5e7eb;
-  padding:10px;
-  border-radius:8px;
-  cursor:pointer;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  transition:.2s;
-}
-.place-item:hover {
-  background:#eef5ff;
-}
-.place-active {
-  background:#d9e9ff !important;
-  border-color:#0b5ed7;
+/* ---------------------------
+   FECHAR DETALHES (MODO C)
+---------------------------- */
+function initDetailsPanel() {
+  document.getElementById("closeDetails").addEventListener("click", () => {
+    document.getElementById("detailsPanel").classList.remove("open");
+
+    if (userLocation) {
+      map.panTo(userLocation);
+      map.setZoom(15);
+    } else if (previousView) {
+      map.panTo(previousView.center);
+      map.setZoom(previousView.zoom);
+    }
+
+    markers.forEach(m => {
+      const cfg = categoryConfig[m._category];
+      m.setIcon({
+        url: makeSvgPin(cfg.color, 36),
+        scaledSize: new google.maps.Size(36, 36)
+      });
+      m.setOpacity(1);
+    });
+  });
 }
 
-/* MAPA */
-.map {
-  width:100%;
-  height:75vh;
-  border-radius:10px;
-  overflow:hidden;
-  box-shadow:var(--shadow);
-}
-@media (max-width:600px){
-  .map { height:60vh; }
+/* ---------------------------
+   EXTRA DETALHES (CACHE)
+---------------------------- */
+function loadExtraDetails(p) {
+  const cacheKey = "detalhes_" + p.name.replace(/\s+/g, "_");
+  const btn = document.getElementById("detailsMoreBtn");
+
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    btn.textContent = "Detalhes carregados (offline)";
+    btn.onclick = () => alert(cached);
+    return;
+  }
+
+  btn.textContent = "Carregar mais detalhes";
+
+  btn.onclick = () => {
+    const texto =
+      `Informações adicionais sobre ${p.name}.\nEste é um resumo offline gerado automaticamente.`;
+    localStorage.setItem(cacheKey, texto);
+    alert(texto);
+    btn.textContent = "Detalhes carregados (offline)";
+  };
 }
 
-/* FOOTER */
-.site-footer {
-  padding:12px 0;
-  text-align:center;
-  color:var(--muted);
+/* ---------------------------
+   LISTA DE LOCAIS
+---------------------------- */
+function initListaLocais() { renderLista(); }
+
+function renderLista() {
+  const lista = document.getElementById("listaLocais");
+  lista.innerHTML = "";
+
+  let items = markers
+    .filter(m => m.getVisible())
+    .map(m => ({
+      marker: m,
+      data: m._data,
+      distance: userLocation
+        ? haversine(userLocation.lat, userLocation.lng, m._data.lat, m._data.lng)
+        : null
+    }));
+
+  items.sort((a, b) => {
+    if (userLocation) return a.distance - b.distance;
+    if (a.data.category === b.data.category)
+      return a.data.name.localeCompare(b.data.name);
+    return a.data.category.localeCompare(b.data.category);
+  });
+
+  items.forEach(i => {
+    const div = document.createElement("div");
+    div.className = "place-item";
+
+    div.innerHTML = `
+      <span>${i.data.name}</span>
+      <span class="place-distance">${
+        i.distance ? i.distance.toFixed(1) + " km" : i.data.category
+      }</span>
+    `;
+
+    div.onclick = () => openDetails(i.marker);
+    lista.appendChild(div);
+  });
 }
 
-/* PANEL - DETALHES (BOTTOM SHEET) */
-.details-panel {
-  position:fixed;
-  bottom:-100%;
-  left:0;
-  width:100%;
-  background:var(--details-bg);
-  border-radius:18px 18px 0 0;
-  box-shadow:var(--details-shadow);
-  padding:12px 16px 30px;
-  transition:bottom .35s ease;
-  z-index:50;
+/* ---------------------------
+   FILTROS
+---------------------------- */
+function initFilters() {
+  const box = document.getElementById("filters");
+  box.innerHTML = "";
+
+  Object.keys(categoryConfig).forEach(cat => {
+    const id = "f_" + cat.replace(/\s+/g, "_");
+
+    const div = document.createElement("div");
+    div.className = "filter-item";
+
+    div.innerHTML = `
+      <input type="checkbox" id="${id}" data-cat="${cat}" checked />
+      <label for="${id}">${cat}</label>
+    `;
+
+    div.querySelector("input").onchange = applyFilters;
+    box.appendChild(div);
+  });
 }
 
-.details-panel.open {
-  bottom:0;
+function applyFilters() {
+  const active = [...document.querySelectorAll("#filters input:checked")]
+    .map(i => i.dataset.cat);
+
+  markers.forEach(m => {
+    m.setVisible(active.includes(m._category));
+  });
+
+  markerCluster.clearMarkers();
+  markerCluster.addMarkers(markers.filter(m => m.getVisible()));
+
+  renderLista();
 }
 
-.details-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+/* ---------------------------
+   BUSCA GLOBAL
+---------------------------- */
+function initSearch() {
+  const box = document.getElementById("searchBox");
+  const clear = document.getElementById("btnClearSearch");
+
+  box.oninput = () => {
+    const q = box.value.toLowerCase();
+
+    markers.forEach(m => {
+      const d = m._data;
+      const txt = `${d.name} ${d.address} ${d.details}`.toLowerCase();
+      m.setVisible(txt.includes(q));
+    });
+
+    markerCluster.clearMarkers();
+    markerCluster.addMarkers(markers.filter(m => m.getVisible()));
+
+    renderLista();
+  };
+
+  clear.onclick = () => {
+    box.value = "";
+    box.dispatchEvent(new Event("input"));
+  };
 }
 
-.details-handle {
-  width:45px;
-  height:5px;
-  background:#ccc;
-  border-radius:4px;
-  margin:0 auto 10px;
+/* ---------------------------
+   BUSCA POR BAIRRO
+---------------------------- */
+function initBairroSearch() {
+  const box = document.getElementById("bairroBox");
+  box.oninput = () => {
+    const q = box.value.toLowerCase();
+
+    if (!q) return applyFilters();
+
+    markers.forEach(m => {
+      const txt = `${m._data.address} ${m._data.details}`.toLowerCase();
+      m.setVisible(txt.includes(q));
+    });
+
+    markerCluster.clearMarkers();
+    markerCluster.addMarkers(markers.filter(m => m.getVisible()));
+
+    renderLista();
+  };
 }
 
-.close-details {
-  background:transparent;
-  border:0;
-  font-size:18px;
-  cursor:pointer;
-  color:#555;
-  margin-left:auto;
+/* ---------------------------
+   BOTÃO GEOLOCALIZAÇÃO
+---------------------------- */
+function initGeoBtn() {
+  const btn = document.getElementById("geoBtn");
+
+  btn.onclick = () => {
+    btn.textContent = "📍 buscando...";
+
+    navigator.geolocation.getCurrentPosition(pos => {
+      userLocation = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude
+      };
+
+      btn.textContent = "📍 Minha localização";
+
+      if (!userMarker) {
+        userMarker = new google.maps.Marker({
+          map,
+          position: userLocation,
+          title: "Você está aqui",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: "#0b5ed7",
+            fillOpacity: 1,
+            strokeColor: "#fff",
+            strokeWeight: 2
+          }
+        });
+      } else {
+        userMarker.setPosition(userLocation);
+      }
+
+      renderLista();
+
+      map.panTo(userLocation);
+      map.setZoom(15);
+    });
+  };
 }
 
-.details-content {
-  margin-top:6px;
+/* ---------------------------
+   FIT
+---------------------------- */
+function fitToMarkers() {
+  const bounds = new google.maps.LatLngBounds();
+  markers.forEach(m => bounds.extend(m.getPosition()));
+  map.fitBounds(bounds);
 }
 
-.details-photo {
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  border-radius:10px;
-  background:#ddd;
-  margin-bottom:12px;
+/* ---------------------------
+   BOTTOM PANEL TOGGLE (MOBILE)
+---------------------------- */
+function initPanelToggle() {
+  const btn = document.getElementById("togglePanel");
+  const panel = document.getElementById("panel");
+
+  btn.onclick = () => {
+    const hidden = panel.style.display === "none";
+    panel.style.display = hidden ? "block" : "none";
+    btn.textContent = hidden ? "Filtros ▾" : "Filtros ▸";
+  };
+
+  if (window.innerWidth < 900) {
+    panel.style.display = "none";
+    btn.textContent = "Filtros ▸";
+  }
 }
 
-.details-cat {
-  color:#0b5ed7;
-  font-weight:600;
-  margin-top:-6px;
-}
-
-.details-more {
-  display:block;
-  width:100%;
-  margin-top:16px;
-  padding:12px;
-  background:#0b5ed7;
-  color:white;
-  border:0;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-/* HIDDEN CLASS */
-.hidden {
-  display:none;
+/* ---------------------------
+   FUNÇÕES ÚTEIS
+---------------------------- */
+function haversine(lat1, lon1, lat2, lon2) {
+  function rad(v) { return v * Math.PI / 180; }
+  const R = 6371;
+  const dLat = rad(lat2-lat1);
+  const dLon = rad(lon2-lon1);
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos(rad(lat1)) *
+    Math.cos(rad(lat2)) *
+    Math.sin(dLon/2)**2;
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
 }
