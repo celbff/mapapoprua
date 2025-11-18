@@ -22,12 +22,17 @@ html,body{height:100%;margin:0;font-family:Inter, "Helvetica Neue", Arial, sans-
 .brand h1{font-size:18px;margin:0}
 .brand .subtitle{margin:2px 0 0;color:var(--muted);font-size:13px}
 
+/* LOGO DO COMITÊ */
+.logo{
+  width:52px;
+  height:52px;
+  object-fit:contain;
+}
+
 .controls{display:flex;gap:12px;align-items:center}
 .search{display:flex;align-items:center;background:#f1f3f5;border-radius:8px;padding:6px;border:1px solid #e0e6ef}
 .search input{border:0;background:transparent;padding:6px 8px;width:220px;outline:none}
 .search button{background:transparent;border:0;cursor:pointer;font-size:14px;color:#777}
-
-.header-inner .logo{width:44px;height:44px;background:#ddd;border-radius:6px;display:inline-block}
 
 .main-grid{display:grid;grid-template-columns:320px 1fr;gap:16px;padding:18px 0;min-height:calc(100vh - 120px)}
 @media (max-width:900px){.main-grid{grid-template-columns:1fr}.panel{order:2}.map-section{order:1}}
