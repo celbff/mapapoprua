@@ -1,11 +1,9 @@
-/* ---------------------------
-   CONFIGURAÇÃO DA FOTO
----------------------------- */
-const PHOTO_BASE_URL = "https://raw.githubusercontent.com/celbff/mapapoprua/main/fotos/";
+/* ============================================================
+   MAPA – Rede de Apoio – Araraquara/SP
+   script.js — versão completa PWA + filtros + lista + detalhes
+   ============================================================ */
 
-/* ---------------------------
-   DADOS INICIAIS (com campo photo)
----------------------------- */
+/* ---------- DADOS (JSON) ---------- */
 const pontos = [
   {
     name: "Centro Pop",
@@ -14,9 +12,9 @@ const pontos = [
     details: "",
     phone: "",
     hours: "",
+    photo: "https://raw.githubusercontent.com/celbff/mapapoprua/main/fotos/centro_pop.jpg",
     lat: -21.7895843,
-    lng: -48.1775678,
-    photo: "centro-pop.jpg"
+    lng: -48.1775678
   },
   {
     name: 'Casa de acolhida "Assad-Kan"',
@@ -25,20 +23,20 @@ const pontos = [
     details: "",
     phone: "",
     hours: "",
+    photo: "https://raw.githubusercontent.com/celbff/mapapoprua/main/fotos/assad_kan.jpg",
     lat: -21.7905161,
-    lng: -48.1917449,
-    photo: "assad-kan.jpg"
+    lng: -48.1917449
   },
   {
     name: "CRAS Central",
     category: "Serviços Públicos de Referência",
-    address: "Rua Gonçalves Dias, 468 Centro (antigo prédio da UMED, esquina com Av. Espanha)",
+    address: "Rua Gonçalves Dias, 468 - Centro",
     details: "Centro de Referência da Assistência Social - Unidade Central",
     phone: "",
     hours: "",
+    photo: "https://raw.githubusercontent.com/celbff/mapapoprua/main/fotos/cras_central.jpg",
     lat: -21.791522,
-    lng: -48.173929,
-    photo: "cras-central.jpg"
+    lng: -48.173929
   },
   {
     name: "Associação São Pio (masculino)",
@@ -47,9 +45,9 @@ const pontos = [
     details: "Apoio social e reinserção",
     phone: "",
     hours: "",
+    photo: "https://raw.githubusercontent.com/celbff/mapapoprua/main/fotos/sao_pio_masc.jpg",
     lat: -21.824304,
-    lng: -48.2037705,
-    photo: "sao-pio-masc.jpg"
+    lng: -48.2037705
   },
   {
     name: "Associação São Pio (feminina)",
@@ -58,9 +56,9 @@ const pontos = [
     details: "Apoio social e reinserção",
     phone: "",
     hours: "",
+    photo: "https://raw.githubusercontent.com/celbff/mapapoprua/main/fotos/sao_pio_fem.jpg",
     lat: -21.7665622,
-    lng: -48.1782641,
-    photo: "sao-pio-fem.jpg"
+    lng: -48.1782641
   },
   {
     name: "Fundo Social de Solidariedade de Araraquara",
@@ -69,141 +67,108 @@ const pontos = [
     details: "",
     phone: "",
     hours: "",
+    photo: "https://raw.githubusercontent.com/celbff/mapapoprua/main/fotos/fundo_social.jpg",
     lat: -21.7788367,
-    lng: -48.1921867,
-    photo: "fundo-social.jpg"
+    lng: -48.1921867
   }
 ];
 
+/* ---------- Categorias e cores ---------- */
 const categoryConfig = {
   "Serviços Públicos de Referência": { color: "#2b7cff" },
   "Pontos de Apoio e Parcerias": { color: "#28a745" },
   "Pontos de doação": { color: "#ff8c42" }
 };
 
-/* ---------------------------
-   ESTADOS GLOBAIS
----------------------------- */
-let map, markers = [], markerCluster;
-let userLocation = null;
+/* ---------- Estado global ---------- */
+let map, infoWindow, markers = [], markerCluster;
 let userMarker = null;
+let userLocation = null;
 let selectedMarker = null;
-let previousView = null; // guarda posição/zoom antes de clicar
+let mapLastPosition = null;
 
-/* ---------------------------
-   CRIA PIN SVG COLORIDO
----------------------------- */
+/* ---------- Gera ícone SVG ---------- */
 function makeSvgPin(color, size = 36) {
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
+  return (
+    "data:image/svg+xml;charset=UTF-8," +
+    encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24">
       <path d="M12 2C8 2 5 5 5 9c0 6.2 7 13 7 13s7-6.8 7-13c0-4-3-7-7-7z" fill="${color}" stroke="#fff" stroke-width="1.5"/>
-      <circle cx="12" cy="9" r="2.5" fill="#fff"/>
-    </svg>`;
-  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+      <circle cx="12" cy="9" r="3" fill="#fff"/>
+    </svg>
+  `)
+  );
 }
 
-/* ---------------------------
-   INIT MAP
----------------------------- */
+/* ============================================================
+   Inicialização do Mapa
+   ============================================================ */
 function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: -21.79, lng: -48.185 },
+    center: { lat: -21.79, lng: -48.18 },
     zoom: 13,
-    mapTypeControl: false,
-    fullscreenControl: true,
+    gestureHandling: "greedy",
     streetViewControl: false,
-    gestureHandling: "greedy"
+    mapTypeControl: false
   });
 
+  infoWindow = new google.maps.InfoWindow();
+  
   createMarkers();
+  fitToMarkers();
+
   initFilters();
-  initListaLocais();
   initSearch();
+  initListaLocais();
   initBairroSearch();
   initGeoBtn();
-  initDetailsPanel();
+  initNearbyBtn();
   initPanelToggle();
-
-  fitToMarkers();
+  initDetailsPanel();
 }
 
-/* ---------------------------
-   CRIA TODOS OS MARCADORES
----------------------------- */
+/* ============================================================
+   Criação dos marcadores
+   ============================================================ */
 function createMarkers() {
+  if (markerCluster) markerCluster.clearMarkers();
   markers.forEach(m => m.setMap(null));
   markers = [];
 
   pontos.forEach(p => {
     const iconUrl = makeSvgPin(categoryConfig[p.category].color);
+
     const marker = new google.maps.Marker({
       position: { lat: p.lat, lng: p.lng },
-      map,
-      icon: { url: iconUrl, scaledSize: new google.maps.Size(36, 36) },
       title: p.name,
-      optimized: true
+      icon: { url: iconUrl, scaledSize: new google.maps.Size(36, 36) },
+      map
     });
 
     marker._data = p;
     marker._category = p.category;
 
     marker.addListener("click", () => openDetails(marker));
-
     markers.push(marker);
   });
 
   markerCluster = new markerClusterer.MarkerClusterer({ map, markers });
 }
 
-/* ---------------------------
-   DESTACAR MARCADOR
----------------------------- */
-function highlightMarker(marker) {
-  markers.forEach(m => {
-    if (m === marker) {
-      const cfg = categoryConfig[m._category];
-      m.setIcon({
-        url: makeSvgPin(cfg.color, 48),
-        scaledSize: new google.maps.Size(48, 48)
-      });
-      m.setOpacity(1);
-    } else {
-      m.setOpacity(0.25);
-      const cfg = categoryConfig[m._category];
-      m.setIcon({
-        url: makeSvgPin(cfg.color, 36),
-        scaledSize: new google.maps.Size(36, 36)
-      });
-    }
-  });
-}
-
-/* ---------------------------
-   ABRIR DETALHES
----------------------------- */
+/* ============================================================
+   Abrir painel de detalhes estilo Google Maps
+   ============================================================ */
 function openDetails(marker) {
-  const p = marker._data;
-
-  previousView = {
+  mapLastPosition = {
     center: map.getCenter(),
     zoom: map.getZoom()
   };
 
-  map.panTo(marker.getPosition());
-  map.setZoom(16);
-
-  highlightMarker(marker);
   selectedMarker = marker;
 
-  // Foto
-  const photoUrl = p.photo ? PHOTO_BASE_URL + p.photo : "";
-  const photoEl = document.getElementById("detailsPhoto");
-  if (p.photo) {
-    photoEl.src = photoUrl;
-    photoEl.style.display = "block";
-  } else {
-    photoEl.style.display = "none";
-  }
+  animateMarker(marker);
+
+  const p = marker._data;
 
   document.getElementById("detailsName").textContent = p.name;
   document.getElementById("detailsCategory").textContent = p.category;
@@ -212,207 +177,194 @@ function openDetails(marker) {
   document.getElementById("detailsPhone").textContent = p.phone || "";
   document.getElementById("detailsHours").textContent = p.hours || "";
 
+  document.getElementById("detailsPhoto").src =
+    p.photo || "https://raw.githubusercontent.com/celbff/mapapoprua/main/fotos/default.jpg";
+
+  // Exibir distância
   if (userLocation) {
-    const dist = haversine(userLocation.lat, userLocation.lng, p.lat, p.lng);
+    const dist = haversineDistance(
+      userLocation.lat,
+      userLocation.lng,
+      p.lat,
+      p.lng
+    ).toFixed(1);
+
     document.getElementById("detailsDistance").textContent =
-      `Distância: ${dist.toFixed(1)} km`;
-  } else {
-    document.getElementById("detailsDistance").textContent = "";
+      "Distância: " + dist + " km";
   }
 
-  loadExtraDetails(p);
+  // Botão de rotas
+  document.getElementById("routeBtn").onclick = () => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=walking`;
+    window.open(url, "_blank");
+  };
 
+  // Mostrar painel
   document.getElementById("detailsPanel").classList.add("open");
+
+  // Centrar no ponto
+  map.panTo({ lat: p.lat, lng: p.lng });
+  map.setZoom(16);
 }
 
-/* ---------------------------
-   FECHAR DETALHES (MODO C)
----------------------------- */
+/* ============================================================
+   Fechar painel e restaurar mapa
+   ============================================================ */
 function initDetailsPanel() {
   document.getElementById("closeDetails").addEventListener("click", () => {
     document.getElementById("detailsPanel").classList.remove("open");
 
     if (userLocation) {
       map.panTo(userLocation);
-      map.setZoom(15);
-    } else if (previousView) {
-      map.panTo(previousView.center);
-      map.setZoom(previousView.zoom);
+      map.setZoom(14);
+    } else if (mapLastPosition) {
+      map.panTo(mapLastPosition.center);
+      map.setZoom(mapLastPosition.zoom);
     }
 
-    markers.forEach(m => {
-      const cfg = categoryConfig[m._category];
-      m.setIcon({
-        url: makeSvgPin(cfg.color, 36),
-        scaledSize: new google.maps.Size(36, 36)
-      });
-      m.setOpacity(1);
-    });
-  });
-}
-
-/* ---------------------------
-   EXTRA DETALHES (CACHE)
----------------------------- */
-function loadExtraDetails(p) {
-  const cacheKey = "detalhes_" + p.name.replace(/\s+/g, "_");
-  const btn = document.getElementById("detailsMoreBtn");
-
-  const cached = localStorage.getItem(cacheKey);
-  if (cached) {
-    btn.textContent = "Detalhes carregados (offline)";
-    btn.onclick = () => alert(cached);
-    return;
-  }
-
-  btn.textContent = "Carregar mais detalhes";
-
-  btn.onclick = () => {
-    const texto =
-      `Informações adicionais sobre ${p.name}.\nEste é um resumo offline gerado automaticamente.`;
-    localStorage.setItem(cacheKey, texto);
-    alert(texto);
-    btn.textContent = "Detalhes carregados (offline)";
-  };
-}
-
-/* ---------------------------
-   LISTA DE LOCAIS
----------------------------- */
-function initListaLocais() { renderLista(); }
-
-function renderLista() {
-  const lista = document.getElementById("listaLocais");
-  lista.innerHTML = "";
-
-  let items = markers
-    .filter(m => m.getVisible())
-    .map(m => ({
-      marker: m,
-      data: m._data,
-      distance: userLocation
-        ? haversine(userLocation.lat, userLocation.lng, m._data.lat, m._data.lng)
-        : null
+    markers.forEach(m => m.setIcon({
+      url: makeSvgPin(categoryConfig[m._category].color),
+      scaledSize: new google.maps.Size(36, 36)
     }));
-
-  items.sort((a, b) => {
-    if (userLocation) return a.distance - b.distance;
-    if (a.data.category === b.data.category)
-      return a.data.name.localeCompare(b.data.name);
-    return a.data.category.localeCompare(b.data.category);
-  });
-
-  items.forEach(i => {
-    const div = document.createElement("div");
-    div.className = "place-item";
-
-    div.innerHTML = `
-      <span>${i.data.name}</span>
-      <span class="place-distance">${
-        i.distance ? i.distance.toFixed(1) + " km" : i.data.category
-      }</span>
-    `;
-
-    div.onclick = () => openDetails(i.marker);
-    lista.appendChild(div);
   });
 }
 
-/* ---------------------------
-   FILTROS
----------------------------- */
+/* ============================================================
+   Animação do PIN
+   ============================================================ */
+function animateMarker(marker) {
+  markers.forEach(m => m.setOpacity(0.35));
+  marker.setOpacity(1);
+
+  marker.setAnimation(google.maps.Animation.BOUNCE);
+  setTimeout(() => marker.setAnimation(null), 1000);
+
+  marker.setIcon({
+    url: makeSvgPin(categoryConfig[marker._category].color, 46),
+    scaledSize: new google.maps.Size(46, 46)
+  });
+}
+
+/* ============================================================
+   Filtros
+   ============================================================ */
 function initFilters() {
-  const box = document.getElementById("filters");
-  box.innerHTML = "";
+  const filtersBox = document.getElementById("filters");
+  filtersBox.innerHTML = "";
 
   Object.keys(categoryConfig).forEach(cat => {
-    const id = "f_" + cat.replace(/\s+/g, "_");
+    const id = "f-" + slug(cat);
 
-    const div = document.createElement("div");
-    div.className = "filter-item";
-
-    div.innerHTML = `
-      <input type="checkbox" id="${id}" data-cat="${cat}" checked />
-      <label for="${id}">${cat}</label>
+    filtersBox.innerHTML += `
+      <div class="filter-item">
+        <input type="checkbox" id="${id}" data-cat="${cat}" checked>
+        <label for="${id}">
+          <span class="dot" style="background:${categoryConfig[cat].color}"></span>
+          ${cat}
+        </label>
+      </div>
     `;
+  });
 
-    div.querySelector("input").onchange = applyFilters;
-    box.appendChild(div);
+  document.querySelectorAll("#filters input").forEach(chk => {
+    chk.addEventListener("change", onFilterChange);
   });
 }
 
-function applyFilters() {
-  const active = [...document.querySelectorAll("#filters input:checked")]
-    .map(i => i.dataset.cat);
+function onFilterChange() {
+  const activeCats = [...document.querySelectorAll("#filters input:checked")]
+    .map(c => c.dataset.cat);
 
-  markers.forEach(m => {
-    m.setVisible(active.includes(m._category));
-  });
+  markers.forEach(m => m.setVisible(activeCats.includes(m._category)));
 
   markerCluster.clearMarkers();
   markerCluster.addMarkers(markers.filter(m => m.getVisible()));
 
-  renderLista();
+  renderListaLocais();
 }
 
-/* ---------------------------
-   BUSCA GLOBAL
----------------------------- */
+/* ============================================================
+   Lista lateral
+   ============================================================ */
+function initListaLocais() {
+  renderListaLocais();
+}
+
+function renderListaLocais() {
+  const box = document.getElementById("listaLocais");
+  box.innerHTML = "";
+
+  const visibles = markers
+    .filter(m => m.getVisible())
+    .sort((a, b) => a._data.name.localeCompare(b._data.name));
+
+  visibles.forEach(m => {
+    const d = m._data;
+    const div = document.createElement("div");
+    div.className = "place-item";
+    div.innerHTML = `
+      <span>${d.name}</span>
+      <span>${d.category}</span>
+    `;
+    div.addEventListener("click", () => openDetails(m));
+    box.appendChild(div);
+  });
+}
+
+/* ============================================================
+   Buscar por texto
+   ============================================================ */
 function initSearch() {
   const box = document.getElementById("searchBox");
-  const clear = document.getElementById("btnClearSearch");
+  const btn = document.getElementById("btnClearSearch");
 
-  box.oninput = () => {
+  box.addEventListener("input", () => {
     const q = box.value.toLowerCase();
 
     markers.forEach(m => {
       const d = m._data;
-      const txt = `${d.name} ${d.address} ${d.details}`.toLowerCase();
-      m.setVisible(txt.includes(q));
+      const text = `${d.name} ${d.address} ${d.details}`.toLowerCase();
+      m.setVisible(text.includes(q));
     });
 
     markerCluster.clearMarkers();
     markerCluster.addMarkers(markers.filter(m => m.getVisible()));
+    renderListaLocais();
+  });
 
-    renderLista();
-  };
-
-  clear.onclick = () => {
+  btn.onclick = () => {
     box.value = "";
     box.dispatchEvent(new Event("input"));
   };
 }
 
-/* ---------------------------
-   BUSCA POR BAIRRO
----------------------------- */
+/* ============================================================
+   Buscar por bairro
+   ============================================================ */
 function initBairroSearch() {
   const box = document.getElementById("bairroBox");
-  box.oninput = () => {
+
+  box.addEventListener("input", () => {
     const q = box.value.toLowerCase();
 
-    if (!q) return applyFilters();
-
     markers.forEach(m => {
-      const txt = `${m._data.address} ${m._data.details}`.toLowerCase();
-      m.setVisible(txt.includes(q));
+      const hay = (m._data.address || "").toLowerCase();
+      m.setVisible(hay.includes(q));
     });
 
     markerCluster.clearMarkers();
     markerCluster.addMarkers(markers.filter(m => m.getVisible()));
-
-    renderLista();
-  };
+    renderListaLocais();
+  });
 }
 
-/* ---------------------------
-   BOTÃO GEOLOCALIZAÇÃO
----------------------------- */
+/* ============================================================
+   Botão "Minha localização"
+   ============================================================ */
 function initGeoBtn() {
-  const btn = document.getElementById("geoBtn");
-
-  btn.onclick = () => {
-    btn.textContent = "📍 buscando...";
+  document.getElementById("geoBtn").addEventListener("click", () => {
+    if (!navigator.geolocation)
+      return alert("Seu dispositivo não suporta geolocalização.");
 
     navigator.geolocation.getCurrentPosition(pos => {
       userLocation = {
@@ -420,16 +372,14 @@ function initGeoBtn() {
         lng: pos.coords.longitude
       };
 
-      btn.textContent = "📍 Minha localização";
-
       if (!userMarker) {
         userMarker = new google.maps.Marker({
-          map,
           position: userLocation,
+          map,
           title: "Você está aqui",
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
+            scale: 8,
             fillColor: "#0b5ed7",
             fillOpacity: 1,
             strokeColor: "#fff",
@@ -440,54 +390,85 @@ function initGeoBtn() {
         userMarker.setPosition(userLocation);
       }
 
-      renderLista();
-
       map.panTo(userLocation);
       map.setZoom(15);
+
+      renderListaLocais();
     });
-  };
+  });
 }
 
-/* ---------------------------
-   FIT
----------------------------- */
-function fitToMarkers() {
-  const bounds = new google.maps.LatLngBounds();
-  markers.forEach(m => bounds.extend(m.getPosition()));
-  map.fitBounds(bounds);
+/* ============================================================
+   Botão "Locais próximos"
+   ============================================================ */
+function initNearbyBtn() {
+  document.getElementById("nearbyBtn").addEventListener("click", () => {
+    if (!userLocation) {
+      alert("Ative primeiro sua localização.");
+      return;
+    }
+
+    markers.sort((a, b) => {
+      const distA = haversineDistance(
+        userLocation.lat, userLocation.lng, a._data.lat, a._data.lng
+      );
+      const distB = haversineDistance(
+        userLocation.lat, userLocation.lng, b._data.lat, b._data.lng
+      );
+      return distA - distB;
+    });
+
+    renderListaLocais();
+
+    const nearest = markers[0];
+    openDetails(nearest);
+  });
 }
 
-/* ---------------------------
-   BOTTOM PANEL TOGGLE (MOBILE)
----------------------------- */
+/* ============================================================
+   Mostrar / esconder painel (mobile)
+   ============================================================ */
 function initPanelToggle() {
   const btn = document.getElementById("togglePanel");
   const panel = document.getElementById("panel");
 
   btn.onclick = () => {
-    const hidden = panel.style.display === "none";
-    panel.style.display = hidden ? "block" : "none";
-    btn.textContent = hidden ? "Filtros ▾" : "Filtros ▸";
+    panel.classList.toggle("hidden");
+    btn.textContent = panel.classList.contains("hidden")
+      ? "Filtros ▸"
+      : "Filtros ▾";
   };
-
-  if (window.innerWidth < 900) {
-    panel.style.display = "none";
-    btn.textContent = "Filtros ▸";
-  }
 }
 
-/* ---------------------------
-   FUNÇÕES ÚTEIS
----------------------------- */
-function haversine(lat1, lon1, lat2, lon2) {
-  function rad(v) { return v * Math.PI / 180; }
+/* ============================================================
+   Funções auxiliares
+   ============================================================ */
+function slug(s) {
+  return s.toLowerCase().replace(/\s+/g, "-");
+}
+
+/* Distância Haversine (km) */
+function haversineDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
-  const dLat = rad(lat2-lat1);
-  const dLon = rad(lon2-lon1);
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
   const a =
-    Math.sin(dLat/2)**2 +
-    Math.cos(rad(lat1)) *
-    Math.cos(rad(lat2)) *
-    Math.sin(dLon/2)**2;
-  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
+
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
+
+/* Ajusta o mapa para exibir todos os marcadores visíveis */
+function fitToMarkers() {
+  const visibles = markers.filter(m => m.getVisible());
+  if (!visibles.length) return;
+
+  const bounds = new google.maps.LatLngBounds();
+  visibles.forEach(m => bounds.extend(m.getPosition()));
+  map.fitBounds(bounds);
+}
+
