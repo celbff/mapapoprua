@@ -126,6 +126,28 @@ function initMap() {
   initPanelToggle();
   initDetailsPanel();
 }
+/* ---------------------------
+   MENU HAMBURGUER / MOBILE
+---------------------------- */
+function initMobileMenu() {
+  const btn = document.getElementById("menuBtn");
+  const panel = document.getElementById("panel");
+  const overlay = document.getElementById("menuOverlay");
+
+  if (!btn || !panel || !overlay) return;
+
+  btn.addEventListener("click", () => {
+    panel.classList.add("open");
+    overlay.classList.remove("hidden");
+  });
+
+  overlay.addEventListener("click", () => {
+    panel.classList.remove("open");
+    overlay.classList.add("hidden");
+  });
+}
+
+/* Inicializar no final do initMap */
 
 /* ============================================================
    Criação dos marcadores
@@ -471,4 +493,5 @@ function fitToMarkers() {
   visibles.forEach(m => bounds.extend(m.getPosition()));
   map.fitBounds(bounds);
 }
+
 
