@@ -437,3 +437,23 @@ html, body {
     height: 60px;
   }
 }
+
+/* MOBILE — Colocar o hambúrguer abaixo do logo */
+@media (max-width: 900px) {
+
+  .site-header .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .hamburger-btn {
+    align-self: flex-start;
+    margin-left: 4px;
+  }
+
+  /* Texto Araraquara/SP fica mais colado ao hambúrguer */
+  .subtitle {
+    margin-top: -4px;
+  }
+}
