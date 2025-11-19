@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
   <title>Rede de Apoio — Araraquara / SP</title>
 
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="/mapapoprua/manifest.json" />
   <meta name="theme-color" content="#0b5ed7">
 
   <!-- Ícones -->
-  <link rel="icon" sizes="192x192" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/mapapoprua/icon-192.png">
+  <link rel="apple-touch-icon" href="/mapapoprua/icon-192.png">
 
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/mapapoprua/style.css" />
 
-  <!-- Google Maps + Cluster -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAQuuCXrPdCDEK-jsMfAfzEMD12GtJt0YU&callback=initMap" async defer></script>
-  <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+  <!-- Google Maps (defer garante ordem e evita erro initMap) -->
+  <script src="/mapapoprua/script.js" defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAQuuCXrPdCDEK-jsMfAfzEMD12GtJt0YU&callback=initMap" defer></script>
+  <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js" defer></script>
+
 </head>
 
 <body>
@@ -30,7 +35,7 @@
     <div class="header-line1">Rede de Apoio —</div>
 
     <div class="header-line2-3">
-      <img src="logo_comite.png" class="logo" alt="Logo Comitê" />
+      <img src="/mapapoprua/logo_comite.png" class="logo" alt="Logo Comitê" />
       <div class="header-title-block">
         <h1>População em Situação de Rua</h1>
         <p class="subtitle-big">Araraquara/SP — Serviços, apoio e doações</p>
@@ -48,17 +53,12 @@
 <div class="container">
   <div class="main-grid">
 
-    <!-- PAINEL LATERAL (MENU) -->
     <aside id="panel" class="panel">
-
-      <!-- FILTROS DINÂMICOS GERADOS VIA script.js -->
       <div id="filters" class="filters"></div>
       <hr>
-
       <div id="listaLocais" class="lista"></div>
     </aside>
 
-    <!-- MAPA -->
     <section class="map-section">
       <div id="map" class="map"></div>
     </section>
@@ -66,9 +66,7 @@
   </div>
 </div>
 
-<!-- BOTTOM SHEET DE DETALHES -->
 <div id="detailsPanel" class="details-panel state-closed">
-
   <div id="sheetHandle" class="sheet-handle">
     <div class="handle-bar"></div>
   </div>
@@ -80,7 +78,7 @@
 
     <img id="detailsPhoto" class="details-photo" src="" alt="Foto do local">
 
-    <p id="detailsCategory" class="details-category"></p>
+    <p id="detailsCategory"></p>
     <p id="detailsAddress"></p>
     <p id="detailsDetails"></p>
     <p id="detailsPhone"></p>
@@ -88,14 +86,10 @@
     <p id="detailsDistance"></p>
 
     <button id="routeBtn" class="route-btn">📍 Traçar rota</button>
-
     <button id="detailsMore" class="details-more">Mais detalhes</button>
 
-    <div id="detailsExtraBlock" class="details-extra-block hidden" style="display:none;">
-      <!-- Você pode colocar detalhes adicionais aqui futuramente -->
-    </div>
+    <div id="detailsExtraBlock" class="details-extra-block hidden" style="display:none;"></div>
   </div>
-
 </div>
 
 <footer class="site-footer">
@@ -104,11 +98,9 @@
   </div>
 </footer>
 
-<script src="script.js"></script>
-
 <script>
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
+    navigator.serviceWorker.register("/mapapoprua/service-worker.js");
   }
 </script>
 
