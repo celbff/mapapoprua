@@ -10,15 +10,19 @@
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b5ed7">
 
+  <!-- Ícones -->
   <link rel="icon" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
 
   <link rel="stylesheet" href="style.css" />
 
+  <!-- Google Maps + Cluster -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAQuuCXrPdCDEK-jsMfAfzEMD12GtJt0YU&callback=initMap" async defer></script>
   <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
 </head>
+
 <body>
+
 <header class="site-header">
   <div id="menuOverlay" class="menu-overlay hidden"></div>
 
@@ -44,38 +48,17 @@
 <div class="container">
   <div class="main-grid">
 
+    <!-- PAINEL LATERAL (MENU) -->
     <aside id="panel" class="panel">
-      <div class="filters">
-        <label class="filter-item">
-          <input type="checkbox" value="acolhimento" checked>
-          <span class="dot" style="background:#0b5ed7"></span>
-          Acolhimento
-        </label>
 
-        <label class="filter-item">
-          <input type="checkbox" value="alimentacao" checked>
-          <span class="dot" style="background:#28a745"></span>
-          Alimentação
-        </label>
-
-        <label class="filter-item">
-          <input type="checkbox" value="saude" checked>
-          <span class="dot" style="background:#dc3545"></span>
-          Saúde
-        </label>
-
-        <label class="filter-item">
-          <input type="checkbox" value="assistencia" checked>
-          <span class="dot" style="background:#ffc107"></span>
-          Assistência Social
-        </label>
-      </div>
-
+      <!-- FILTROS DINÂMICOS GERADOS VIA script.js -->
+      <div id="filters" class="filters"></div>
       <hr>
 
       <div id="listaLocais" class="lista"></div>
     </aside>
 
+    <!-- MAPA -->
     <section class="map-section">
       <div id="map" class="map"></div>
     </section>
@@ -83,8 +66,10 @@
   </div>
 </div>
 
+<!-- BOTTOM SHEET DE DETALHES -->
 <div id="detailsPanel" class="details-panel state-closed">
-  <div class="sheet-handle">
+
+  <div id="sheetHandle" class="sheet-handle">
     <div class="handle-bar"></div>
   </div>
 
@@ -92,21 +77,25 @@
 
   <div class="details-content">
     <h2 id="detailsName"></h2>
-    <img id="detailsPhoto" class="details-photo" src="" alt="">
-    <p id="detailsDescription"></p>
+
+    <img id="detailsPhoto" class="details-photo" src="" alt="Foto do local">
+
+    <p id="detailsCategory" class="details-category"></p>
     <p id="detailsAddress"></p>
+    <p id="detailsDetails"></p>
     <p id="detailsPhone"></p>
+    <p id="detailsHours"></p>
+    <p id="detailsDistance"></p>
 
     <button id="routeBtn" class="route-btn">📍 Traçar rota</button>
 
     <button id="detailsMore" class="details-more">Mais detalhes</button>
 
-    <div id="detailsExtra" class="details-extra-block" style="display:none;">
-      <p id="detailsHorario"></p>
-      <p id="detailsResponsavel"></p>
-      <p id="detailsObservacoes"></p>
+    <div id="detailsExtraBlock" class="details-extra-block hidden" style="display:none;">
+      <!-- Você pode colocar detalhes adicionais aqui futuramente -->
     </div>
   </div>
+
 </div>
 
 <footer class="site-footer">
@@ -125,4 +114,3 @@
 
 </body>
 </html>
-
