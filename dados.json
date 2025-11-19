@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Centro Pop",
+    "category": "Serviços Públicos de Referência",
+    "address": "",
+    "details": "",
+    "phone": "",
+    "hours": "",
+    "lat": -21.7895843,
+    "lng": -48.1775678
+  },
+  {
+    "name": "Casa de acolhida \"Assad-Kan\"",
+    "category": "Serviços Públicos de Referência",
+    "address": "",
+    "details": "",
+    "phone": "",
+    "hours": "",
+    "lat": -21.7905161,
+    "lng": -48.1917449
+  },
+  {
+    "name": "CRAS Central",
+    "category": "Serviços Públicos de Referência",
+    "address": "Rua Gonçalves Dias, 468 Centro (antigo prédio da UMED, esquina com Av. Espanha)",
+    "details": "Centro de Referência da Assistência Social - Unidade Central",
+    "phone": "",
+    "hours": "",
+    "lat": -21.791522,
+    "lng": -48.173929
+  },
+  {
+    "name": "Associação São Pio (masculino)",
+    "category": "Pontos de Apoio e Parcerias",
+    "address": "",
+    "details": "Apoio social e reinserção",
+    "phone": "",
+    "hours": "",
+    "lat": -21.824304,
+    "lng": -48.2037705
+  },
+  {
+    "name": "Associação São Pio (feminina)",
+    "category": "Pontos de Apoio e Parcerias",
+    "address": "",
+    "details": "Apoio social e reinserção",
+    "phone": "",
+    "hours": "",
+    "lat": -21.7665622,
+    "lng": -48.1782641
+  },
+  {
+    "name": "Fundo Social de Solidariedade de Araraquara",
+    "category": "Pontos de doação",
+    "address": "",
+    "details": "",
+    "phone": "",
+    "hours": "",
+    "lat": -21.7788367,
+    "lng": -48.1921867
+  }
+]
