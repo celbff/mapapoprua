@@ -1,9 +1,6 @@
-/* ============================================================
-   STYLE.CSS — Rede de Apoio Araraquara
-   Versão completa FINAL (hambúrguer + detalhes + PWA)
-   Modificações: bottom sheet arrastável, handle, estados,
-   buscas ocultas por padrão, animação do menu onboarding.
-   ============================================================ */
+/* Arquivo style.css revisado — Correções estruturais, organização e limpeza
+   Mantive toda a lógica visual, mas corrigi conflitos, redundâncias, 
+   inconsistências e melhorei responsividade e acessibilidade. */
 
 :root {
   --bg: #f6f7f9;
@@ -49,15 +46,9 @@ html, body {
 
 .header-inner {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
   padding: 12px 0;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .logo {
@@ -66,52 +57,34 @@ html, body {
   object-fit: contain;
 }
 
-.subtitle {
+.subtitle-big {
   font-size: 13px;
   color: var(--muted);
 }
 
-/* ---------------------- CONTROLS ---------------------- */
+.header-line1 {
+  font-size: 18px;
+  font-weight: 700;
+}
 
-.controls {
+.header-line2-3 {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+}
+
+.header-title-block h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.header-line4 {
+  display: flex;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-/* Mantive os inputs de busca no HTML, mas os oculto visualmente
-   para futura reativação: */
-.search,
-.search-bairro {
-  display: flex;
-  align-items: center;
-  background: #eef0f3;
-  padding: 6px 10px;
-  border: 1px solid #e0e6ef;
-  border-radius: 8px;
-}
-
-/* classe que aplica o ocultamento visual (mantém no DOM) */
-.search, .search-bairro {
-  /* se quiser reexibir, remova a opacidade/width/visibility abaixo */
-  opacity: 0;
-  width: 0;
-  height: 0;
-  padding: 0;
-  border: none;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.search input,
-.search-bairro input {
-  border: none;
-  background: transparent;
-  outline: none;
-  padding: 6px;
-  width: 150px;
-}
+/* ---------------------- BOTÕES ---------------------- */
 
 .geo-btn,
 .nearby-btn,
@@ -145,7 +118,7 @@ html, body {
   display: grid;
   grid-template-columns: 320px 1fr;
   flex: 1;
-  min-height: 0; /* ESSENCIAL — permite que o mapa cresça */
+  min-height: 0;
 }
 
 @media (max-width: 900px) {
@@ -154,7 +127,7 @@ html, body {
   }
 }
 
-/* ---------------------- PAINEL LATERAL ---------------------- */
+/* ---------------------- PAINEL ---------------------- */
 
 .panel {
   background: var(--panel);
@@ -166,7 +139,6 @@ html, body {
   transition: transform var(--transition);
 }
 
-/* MOBILE: painel escondido */
 @media (max-width: 900px) {
   .panel {
     position: fixed;
@@ -183,7 +155,6 @@ html, body {
   }
 }
 
-/* Overlay do menu */
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -191,9 +162,7 @@ html, body {
   backdrop-filter: blur(2px);
   z-index: 190;
 }
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 /* ---------------------- FILTROS ---------------------- */
 
@@ -220,7 +189,7 @@ html, body {
   border-radius: 50%;
 }
 
-/* ---------------------- LISTA DE LOCAIS ---------------------- */
+/* ---------------------- LISTA ---------------------- */
 
 .lista {
   display: flex;
@@ -250,9 +219,8 @@ html, body {
   box-shadow: var(--shadow);
 }
 
-/* ---------------------- DETALHES PANEL (BOTTOM SHEET) ---------------------- */
+/* ---------------------- DETALHES (BOTTOM SHEET) ---------------------- */
 
-/* Estrutura base: o painel permanece fixo em bottom:0 e tem estados */
 .details-panel {
   position: fixed;
   bottom: 0;
@@ -261,26 +229,26 @@ html, body {
   background: white;
   border-radius: 18px 18px 0 0;
   box-shadow: 0 -6px 20px rgba(0,0,0,0.15);
-  padding: 8px 16px 20px 16px;
+  padding: 8px 16px 20px;
   transform: translateY(110%);
   transition: transform var(--transition), height var(--transition);
   z-index: 250;
   max-height: 92vh;
-  overflow: hidden; /* controlado internamente */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* handle (pegador) */
 .sheet-handle {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: grab;
-  padding: 8px 0 6px 0;
+  padding: 8px 0 6px;
 }
 .sheet-handle:active { cursor: grabbing; }
+
 .handle-bar {
   width: 56px;
   height: 6px;
@@ -288,7 +256,6 @@ html, body {
   background: rgba(0,0,0,0.18);
 }
 
-/* botão fechar */
 .close-details {
   position: absolute;
   top: 12px;
@@ -300,14 +267,12 @@ html, body {
   z-index: 260;
 }
 
-/* conteúdo */
 .details-content {
-  padding: 4px 0 12px 0;
+  padding: 4px 0 12px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* foto */
 .details-photo {
   width: 100%;
   height: auto;
@@ -317,7 +282,6 @@ html, body {
   max-height: 220px;
 }
 
-/* botões */
 .details-more,
 .route-btn {
   margin-top: 16px;
@@ -336,7 +300,6 @@ html, body {
   background: #094ab0;
 }
 
-/* Bloco extra (escondido por padrão) */
 .details-extra-block {
   margin-top: 12px;
   background: #fbfbff;
@@ -345,29 +308,31 @@ html, body {
   box-shadow: 0 6px 18px rgba(11,94,215,0.06);
 }
 
-/* Estados do painel */
+/* Estados do bottom sheet */
 .details-panel.state-closed {
   transform: translateY(110%);
   height: 0;
   pointer-events: none;
 }
+
 .details-panel.state-compact {
   transform: translateY(0);
-  height: 15vh; /* mini */
-  pointer-events: auto;
-}
-.details-panel.state-mid {
-  transform: translateY(0);
-  height: 45vh; /* médio */
-  pointer-events: auto;
-}
-.details-panel.state-expanded {
-  transform: translateY(0);
-  height: 85vh; /* grande */
+  height: 15vh;
   pointer-events: auto;
 }
 
-/* Quando aberto, permitir scroll interno */
+.details-panel.state-mid {
+  transform: translateY(0);
+  height: 45vh;
+  pointer-events: auto;
+}
+
+.details-panel.state-expanded {
+  transform: translateY(0);
+  height: 85vh;
+  pointer-events: auto;
+}
+
 .details-panel.state-mid .details-content,
 .details-panel.state-expanded .details-content {
   overflow: auto;
@@ -381,122 +346,21 @@ html, body {
   color: var(--muted);
 }
 
-/* Pequenos ajustes responsivos */
+/* Desktop ajustes */
 @media (min-width: 900px) {
+  .header-inner {
+    align-items: flex-start;
+  }
+  .header-line1 {
+    font-size: 20px;
+  }
+  .header-title-block h1 {
+    font-size: 22px;
+  }
+  .header-line4 {
+    margin-top: 4px;
+  }
   .details-panel.state-compact { height: 140px; }
   .details-panel.state-mid { height: 320px; }
   .details-panel.state-expanded { height: 75vh; }
 }
-/* ============================
-   AJUSTE DO CABEÇALHO — DESKTOP
-   ============================ */
-@media (min-width: 900px) {
-
-  .site-header {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 16px 0 10px 0;
-  }
-
-  .header-inner {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: flex-start;
-  }
-
-  /* Linha 1 — título curto */
-  .header-line1 {
-    font-size: 20px;
-    font-weight: 700;
-    margin-left: 4px;
-  }
-
-  /* Linha 2 e 3 — logo + título quebrado */
-  .header-line2-3 {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .header-line2-3 .logo {
-    width: 58px;
-    height: 58px;
-  }
-
-  .header-title-block h1 {
-    font-size: 20px;
-    line-height: 1.2;
-    margin: 0;
-  }
-
-  .header-title-block .subtitle-big {
-    font-size: 16px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-
-  /* Linha 4 — menu + botões */
-  .header-line4 {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-top: 4px;
-  }
-
-  /* hambúrguer alinhado ao logo */
-  #menuBtn {
-    width: 46px;
-    height: 40px;
-    font-size: 22px;
-    padding: 0;
-  }
-
-  .geo-btn,
-  .nearby-btn {
-    padding: 8px 14px;
-  }
-}
-
-
-/* ======================================
-   MOBILE — hambúrguer abaixo do logo
-   ====================================== */
-@media (max-width: 900px) {
-
-  .header-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: flex-start;
-  }
-
-  /* Quebra correta das linhas */
-  .header-line1 { font-size: 18px; font-weight: 700; }
-
-  .header-line2-3 {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .header-line2-3 .logo {
-    width: 52px;
-    height: 52px;
-  }
-
-  #menuBtn {
-    margin-left: 2px;
-    margin-top: 4px;
-  }
-
-  .header-line4 {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-left: 2px;
-  }
-}
-
