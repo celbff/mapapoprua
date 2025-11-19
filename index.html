@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Rede de Apoio — Araraquara / SP</title>
 
   <!-- MANIFEST PWA -->
@@ -16,16 +16,19 @@
   <!-- Estilos -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Google Maps -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAQuuCXrPdCDEK-jsMfAfzEMD12GtJt0YU&callback=initMap" async defer></script>
+  <!-- Google Maps API -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAQuuCXrPdCDEK-jsMfAfzEMD12GtJt0YU&callback=initMap"
+    defer
+  ></script>
 
   <!-- MarkerClusterer -->
-  <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+  <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js" defer></script>
 </head>
 <body>
 
 <!-- =========================================================
-     HEADER COMPLETO — LINHAS 1 A 4
+     HEADER — LINHAS 1 A 4
      ========================================================= -->
 <header class="site-header">
   <div id="menuOverlay" class="menu-overlay hidden"></div>
@@ -44,7 +47,7 @@
       </div>
     </div>
 
-    <!-- Linha 4 (botões à esquerda — mobile e desktop) -->
+    <!-- Linha 4 -->
     <div class="header-line4">
       <button id="menuBtn" class="hamburger-btn" aria-label="Abrir menu">☰</button>
       <button id="geoBtn" class="geo-btn">📍 Minha localização</button>
@@ -62,7 +65,7 @@
   <div class="main-grid">
 
     <!-- =========================================================
-         PAINEL LATERAL (MENU)
+         PAINEL LATERAL
          ========================================================= -->
     <aside id="panel" class="panel">
 
@@ -115,16 +118,16 @@
      ========================================================= -->
 <div id="detailsPanel" class="details-panel state-closed">
 
-  <!-- Handle -->
+  <!-- Handle superior -->
   <div class="sheet-handle">
     <div class="handle-bar"></div>
   </div>
 
-  <button id="closeDetails" class="close-details">×</button>
+  <button id="closeDetails" class="close-details" aria-label="Fechar detalhes">×</button>
 
   <div class="details-content">
     <h2 id="detailsName"></h2>
-    <img id="detailsPhoto" class="details-photo" src="" alt="">
+    <img id="detailsPhoto" class="details-photo" src="" alt="Foto do local">
     <p id="detailsDescription"></p>
     <p id="detailsAddress"></p>
     <p id="detailsPhone"></p>
@@ -154,7 +157,7 @@
 <!-- =========================================================
      SCRIPTS
      ========================================================= -->
-<script src="script.js"></script>
+<script src="script.js" defer></script>
 
 <!-- Service Worker -->
 <script>
